@@ -9,6 +9,8 @@ gem 'rails-api'
 
 group :development, :test do
   gem 'rspec-rails'
+
+  gem 'cucumber-rails', :require => false
 end
 
 # To use ActiveModel has_secure_password
