@@ -29,3 +29,5 @@ RsvpApi::Application.configure do
   # Expands the lines which load the assets
   config.assets.debug = true
 end
+
+Rails.application.store = CsvStore.new(Rails.root + 'tmp' + 'development_csv_store')

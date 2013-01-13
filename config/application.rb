@@ -17,6 +17,11 @@ end
 
 module RsvpApi
   class Application < Rails::Application
+    ##
+    # @return [Object] either a GoogleSpreadsheetStore or a CsvStore as appropriate
+    #   for the environment.
+    attr_accessor :store
+
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
