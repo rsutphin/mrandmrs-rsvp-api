@@ -14,6 +14,15 @@ class CsvStore
   end
 
   ##
+  # Empties all data from the store.
+  #
+  # @return [void]
+  def clear
+    directory.rmtree if directory.exist?
+    directory.mkpath
+  end
+
+  ##
   # @param [String] sheet_name
   # @param [Array<Hash<String,String>>] a set of hashes to comprise the sheet.
   def replace_sheet(sheet_name, hashes)

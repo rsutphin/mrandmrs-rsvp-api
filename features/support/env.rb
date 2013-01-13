@@ -35,9 +35,6 @@ ActionController::Base.allow_rescue = false
 Cucumber::Rails::Database.javascript_strategy = :truncation
 
 Before do
-  # Clean up CSV store before each test
-  Rails.application.store.directory.tap do |dir|
-    dir.rmtree
-    dir.mkpath
-  end
+  # Clean out store before each test
+  Rails.application.store.clear
 end

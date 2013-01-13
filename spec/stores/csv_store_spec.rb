@@ -82,4 +82,16 @@ describe CsvStore do
       include_context 'sheet replacement'
     end
   end
+
+  describe '#clear' do
+    it 'removes all sheets from the directory' do
+      directory.mkpath
+      (directory + 'foo.csv').open('w') { }
+      (directory + 'bar.csv').open('w') { }
+
+      store.clear
+
+      directory.children.should == []
+    end
+  end
 end
