@@ -19,6 +19,40 @@ describe CsvStore do
     directory.rmtree if directory.exist?
   end
 
+  describe '#get_sheet' do
+    let(:sheet_name) { 'Frobs' }
+    let(:expected_filename) { directory + "#{sheet_name}.csv" }
+    let(:sheet) { store.get_sheet(sheet_name) }
+
+    before do
+      expected_filename.open('w') do |f|
+        f.puts 'H1,H3,H7,H2'
+        f.puts 'A,B,Q,Eleven'
+        f.puts 'B,6,H,Seven'
+      end
+    end
+
+    it 'returns an enumerable of indexed rows' do
+      sheet.collect { |row| row.respond_to?(:[]) }.uniq.should be_true
+    end
+
+    it 'returns all the rows from the sheet' do
+      sheet.size.should == 2
+    end
+
+    it 'returns all the columns from the sheet' do
+      sheet.collect(&:keys).uniq.should == [%w(H1 H3 H7 H2)]
+    end
+
+    it 'returns the rows in order' do
+      sheet.collect { |row| row['H3'] }.should == %w(B 6)
+    end
+
+    it 'returns nil for an unknown sheet' do
+      store.get_sheet('Zap').should be_nil
+    end
+  end
+
   describe '#replace_sheet' do
     let(:sheet_name) { 'Invites' }
     let(:expected_filename) { (directory + "#{sheet_name}.csv") }

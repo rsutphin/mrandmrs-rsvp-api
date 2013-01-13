@@ -36,6 +36,15 @@ class CsvStore
     end
   end
 
+  ##
+  # @return [Array<Hash<String,String>>] a set of row hashes representing the
+  #   named sheet, or nil if there is no such sheet.
+  def get_sheet(sheet_name)
+    if sheet_path(sheet_name).exist?
+      CSV.read(sheet_path(sheet_name).to_s, headers: true).collect(&:to_hash)
+    end
+  end
+
   def sheet_path(name)
     directory + "#{name}.csv"
   end

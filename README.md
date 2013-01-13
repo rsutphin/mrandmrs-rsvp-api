@@ -15,9 +15,10 @@ into a "store" to be implemented against either a multi-sheet Google doc or a
 directory full of CSVs. The store API is specifically spreadsheet-oriented, but
 should not contain any application logic or knowledge.
 
-On top of the selected store will be a single DAO. Since there are only four
-models, it seems like an ActiveRecord-style per-model abstraction would be
-overkill. The DAO will be application-aware.
+On top of the selected store there will be class-level DAO methods within
+appropriate model classes. These will be AR-like, but fitted to the needs of the
+application only. E.g., "guest" records will only be readable or saveable as
+children of "invitations", not on their own.
 
 IDs for models are assigned (invitiations, entree choices) or derived (guests).
 
