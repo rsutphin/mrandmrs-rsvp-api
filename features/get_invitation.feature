@@ -75,3 +75,36 @@ Scenario: A new multiple-person invitation
       ]
     }
     """
+
+@wip
+Scenario: An invitation which has previously been responded to
+  Given the invitation spreadsheet
+    | RSVP ID | Guest name        | E-mail address | Attending? |
+    | KR018   | John Fredricksson | jf@example.net |            |
+    | KR021   | Emily Carolina    | ec@example.com | y          |
+  And the response notes spreadsheet
+    | RSVP ID | Comment              | Hotel    |
+    | KR021   | Where's the pickles? | Days Inn |
+  When I GET invitations/KR021
+  Then the JSON response is
+    """
+    {
+      "invitation": {
+        "id": "KR021",
+        "guests": [
+          "emilycarolina"
+        ],
+        "comments": "Where's the pickles?",
+        "hotel": "Days Inn"
+      },
+
+      "guests": [
+        {
+          "id": "emilycarolina",
+          "name": "Emily Carolina",
+          "email_address": "ec@example.com",
+          "attending": 'y'
+        }
+      ]
+    }
+    """
