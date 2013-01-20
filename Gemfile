@@ -6,6 +6,7 @@ gem 'rails', '3.2.10'
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 gem 'rails-api'
+gem 'active_model_serializers'
 
 group :development, :test do
   gem 'rspec-rails'

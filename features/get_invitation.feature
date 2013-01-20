@@ -3,7 +3,6 @@ Feature: GET an invitation
   As the application backend
   I want to give invitation details when given an RSVP code
 
-@wip
 Scenario: A new single-person invitation
   Given the invitation spreadsheet
     | RSVP ID | Guest Name        | E-mail Address |
@@ -34,7 +33,6 @@ Scenario: A new single-person invitation
     }
     """
 
-@wip
 Scenario: A new multiple-person invitation
   Given the invitation spreadsheet
     | RSVP ID | Guest Name        | E-mail Address  |
@@ -84,7 +82,6 @@ Scenario: A new multiple-person invitation
     }
     """
 
-@wip
 Scenario: An invitation which has previously been responded to
   Given the invitation spreadsheet
     | RSVP ID | Guest Name        | E-mail Address | Attending? | Entree Choice |
