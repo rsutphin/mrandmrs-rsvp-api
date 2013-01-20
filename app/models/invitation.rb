@@ -1,4 +1,6 @@
 class Invitation
+  include ActiveModel::SerializerSupport
+
   ##
   # @return [String] the assigned ID for this invitation.
   attr_accessor :id
@@ -31,17 +33,17 @@ class Invitation
       Invitation.new.tap do |i|
         i.id = id
         if notes_row
-          i.hotel = notes_row['Hotel']
-          i.response_comments = notes_row['Comments']
+          i.hotel = nil_for_blank(notes_row['Hotel'])
+          i.response_comments = nil_for_blank(notes_row['Comments'])
         end
 
         i.guests = guest_rows.collect { |row|
           Guest.new.tap do |g|
             g.invitation = i
-            g.name = row['Name']
-            g.email_address = row['E-mail Address']
+            g.name = row['Guest Name']
+            g.email_address = nil_for_blank(row['E-mail Address'])
             g.attending = convert_attending_from_store(row['Attending?'])
-            g.entree_choice = row['Entree Choice']
+            g.entree_choice = nil_for_blank(row['Entree Choice'])
           end
         }
       end
@@ -58,5 +60,9 @@ class Invitation
       end
     end
     private :convert_attending_from_store
+
+    def nil_for_blank(s)
+      s.blank? ? nil : s
+    end
   end
 end

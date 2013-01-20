@@ -1,4 +1,6 @@
 class Guest
+  include ActiveModel::SerializerSupport
+
   ##
   # @return [Invitation] the invitation under which this person is invited.
   attr_accessor :invitation
@@ -23,6 +25,6 @@ class Guest
   ##
   # Provides the generated ID for this record.
   def id
-    name.gsub(' ', '').downcase
+    name && name.gsub(' ', '').downcase
   end
 end

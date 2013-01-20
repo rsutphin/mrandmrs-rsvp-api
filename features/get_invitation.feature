@@ -6,7 +6,7 @@ Feature: GET an invitation
 @wip
 Scenario: A new single-person invitation
   Given the invitation spreadsheet
-    | RSVP ID | Guest name        | E-mail address |
+    | RSVP ID | Guest Name        | E-mail Address |
     | KR018   | John Fredricksson | jf@example.net |
     | KR021   | Emily Carolina    | ec@example.com |
   When I GET invitations/KR018
@@ -17,7 +17,9 @@ Scenario: A new single-person invitation
         "id": "KR018",
         "guests": [
           "johnfredricksson"
-        ]
+        ],
+        "response_comments": null,
+        "hotel": null
       },
 
       "guests": [
@@ -25,7 +27,8 @@ Scenario: A new single-person invitation
           "id": "johnfredricksson",
           "name": "John Fredricksson",
           "email_address": "jf@example.net",
-          "attending": null
+          "attending": null,
+          "entree_choice": null
         }
       ]
     }
@@ -34,7 +37,7 @@ Scenario: A new single-person invitation
 @wip
 Scenario: A new multiple-person invitation
   Given the invitation spreadsheet
-    | RSVP ID | Guest name        | E-mail address  |
+    | RSVP ID | Guest Name        | E-mail Address  |
     | KR018   | John Fredricksson | jf@example.net  |
     | KR021   | Emily Carolina    | ec@example.com  |
     | EL000   | Giraffe Sutphin   | jgs@example.net |
@@ -50,27 +53,32 @@ Scenario: A new multiple-person invitation
           "giraffesutphin",
           "jaguarsutphin",
           "elephantsutphin"
-        ]
+        ],
+        "response_comments": null,
+        "hotel": null
       },
 
-      "attendees": [
+      "guests": [
         {
           "id": "giraffesutphin",
           "name": "Giraffe Sutphin",
           "email_address": "jgs@example.net",
-          "attending": ""
+          "attending": null,
+          "entree_choice": null
         },
         {
           "id": "jaguarsutphin",
           "name": "Jaguar Sutphin",
           "email_address": null,
-          "attending": null
+          "attending": null,
+          "entree_choice": null
         },
         {
           "id": "elephantsutphin",
           "name": "Elephant Sutphin",
           "email_address": null,
-          "attending": null
+          "attending": null,
+          "entree_choice": null
         }
       ]
     }
@@ -79,11 +87,11 @@ Scenario: A new multiple-person invitation
 @wip
 Scenario: An invitation which has previously been responded to
   Given the invitation spreadsheet
-    | RSVP ID | Guest name        | E-mail address | Attending? |
-    | KR018   | John Fredricksson | jf@example.net |            |
-    | KR021   | Emily Carolina    | ec@example.com | y          |
+    | RSVP ID | Guest Name        | E-mail Address | Attending? | Entree Choice |
+    | KR018   | John Fredricksson | jf@example.net |            |               |
+    | KR021   | Emily Carolina    | ec@example.com | y          | Veg. Lasagna  |
   And the response notes spreadsheet
-    | RSVP ID | Comment              | Hotel    |
+    | RSVP ID | Comments             | Hotel    |
     | KR021   | Where's the pickles? | Days Inn |
   When I GET invitations/KR021
   Then the JSON response is
@@ -94,7 +102,7 @@ Scenario: An invitation which has previously been responded to
         "guests": [
           "emilycarolina"
         ],
-        "comments": "Where's the pickles?",
+        "response_comments": "Where's the pickles?",
         "hotel": "Days Inn"
       },
 
@@ -103,7 +111,8 @@ Scenario: An invitation which has previously been responded to
           "id": "emilycarolina",
           "name": "Emily Carolina",
           "email_address": "ec@example.com",
-          "attending": 'y'
+          "attending": true,
+          "entree_choice": "Veg. Lasagna"
         }
       ]
     }

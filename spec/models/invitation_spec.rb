@@ -5,9 +5,9 @@ describe Invitation do
     describe '.find' do
       it 'finds an Invitation instance by ID' do
         store.replace_sheet('Invitations', [
-          { 'RSVP ID' => 'KR001', 'Name' => 'F' },
-          { 'RSVP ID' => 'KR002', 'Name' => 'G' },
-          { 'RSVP ID' => 'KR002', 'Name' => 'H' }
+          { 'RSVP ID' => 'KR001', 'Guest Name' => 'F' },
+          { 'RSVP ID' => 'KR002', 'Guest Name' => 'G' },
+          { 'RSVP ID' => 'KR002', 'Guest Name' => 'H' }
         ])
 
         Invitation.find('KR002').should be_a(Invitation)
@@ -15,7 +15,7 @@ describe Invitation do
 
       it 'gives nil for a non-existent instance' do
         store.replace_sheet('Invitations', [
-          { 'RSVP ID' => 'KR002', 'Name' => 'B' }
+          { 'RSVP ID' => 'KR002', 'Guest Name' => 'B' }
         ])
 
         Invitation.find('KR001').should be_nil
@@ -23,7 +23,7 @@ describe Invitation do
 
       it 'finds the invitation if there is only guest info' do
         store.replace_sheet('Invitations', [
-          { 'RSVP ID' => 'KR002', 'Name' => 'B' }
+          { 'RSVP ID' => 'KR002', 'Guest Name' => 'B' }
         ])
 
         Invitation.find('KR002').should_not be_nil
@@ -39,18 +39,19 @@ describe Invitation do
 
       describe 'the loaded instance' do
         let(:invitation) { Invitation.find('KR345') }
+        let(:blank_invitation) { Invitation.find('KR123') }
 
         before do
           store.replace_sheet('Invitations', [
-            { 'RSVP ID' => 'KR345', 'Name' => 'AP', 'E-mail Address' => 'ap@example.com', 'Attending?' => 'y', 'Entree Choice' => 'Crab' },
-            { 'RSVP ID' => 'KR345', 'Name' => 'SP', 'E-mail Address' => 'sp@example.com', 'Attending?' => nil },
-            { 'RSVP ID' => 'KR345', 'Name' => 'RP', 'E-mail Address' => 'rp@example.com', 'Attending?' => 'n' },
-            { 'RSVP ID' => 'KR123', 'Name' => 'ES' }
+            { 'RSVP ID' => 'KR345', 'Guest Name' => 'AP', 'E-mail Address' => 'ap@example.com', 'Attending?' => 'y', 'Entree Choice' => 'Crab' },
+            { 'RSVP ID' => 'KR345', 'Guest Name' => 'SP', 'E-mail Address' => 'sp@example.com', 'Attending?' => nil },
+            { 'RSVP ID' => 'KR345', 'Guest Name' => 'RP', 'E-mail Address' => '', 'Attending?' => 'n', 'Entree Choice' => '' },
+            { 'RSVP ID' => 'KR123', 'Guest Name' => 'ES', 'E-mail Address' => '', 'Attending?' => '', 'Entree Choice' => '' }
           ])
 
           store.replace_sheet('Response Notes', [
             { 'RSVP ID' => 'KR345', 'Comments' => "Eat at Joe's", 'Hotel' => 'The fancy one by the river' },
-            { 'RSVP ID' => 'KR123', 'Comments' => 'I like whales' }
+            { 'RSVP ID' => 'KR123', 'Comments' => '', 'Hotel' => '' }
           ])
         end
 
@@ -72,7 +73,7 @@ describe Invitation do
           end
 
           it 'includes the e-mail address' do
-            invitation.guests.collect(&:email_address).should == %w(ap@example.com sp@example.com rp@example.com)
+            invitation.guests.collect(&:email_address).should == ['ap@example.com', 'sp@example.com', nil]
           end
 
           it 'includes attendance status' do
@@ -88,12 +89,24 @@ describe Invitation do
           end
         end
 
-        it 'includes the hotel' do
-          invitation.hotel.should == 'The fancy one by the river'
+        describe '#hotel' do
+          it 'reflects a set value' do
+            invitation.hotel.should == 'The fancy one by the river'
+          end
+
+          it 'is nil if blank' do
+            blank_invitation.hotel.should be_nil
+          end
         end
 
-        it 'includes any response comments' do
-          invitation.response_comments.should == "Eat at Joe's"
+        describe '#response_comments' do
+          it 'reflects a set value' do
+            invitation.response_comments.should == "Eat at Joe's"
+          end
+
+          it 'is nil if blank' do
+            blank_invitation.response_comments.should be_nil
+          end
         end
       end
     end
