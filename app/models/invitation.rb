@@ -22,6 +22,7 @@ class Invitation
   attr_accessor :hotel
 
   spreadsheet_mapping 'Response Notes' do |m|
+    m.value_mapping('RSVP ID', :id, :identifier => true)
     m.value_mapping('Comments', :response_comments)
     m.value_mapping('Hotel', :hotel)
   end
@@ -30,31 +31,20 @@ class Invitation
     ##
     # @return [Invitation,nil] matching the ID, otherwise `nil`.
     def find(id)
-      guest_rows = Rails.application.store.get_sheet(Guest.sheet_name).try(:select) { |row| row['RSVP ID'] == id }
-      notes_row = Rails.application.store.get_sheet(sheet_name).try(:detect) { |row| row['RSVP ID'] == id }
+      guests = Guest.find_for_rsvp(id)
 
-      if guest_rows.blank?
+      if guests.empty?
         Rails.logger.debug("No guests for RSVP ID #{id.inspect}")
         return nil
       end
 
-      Invitation.new.tap do |i|
-        i.id = id
-        if notes_row
-          i.hotel = nil_for_blank(notes_row['Hotel'])
-          i.response_comments = nil_for_blank(notes_row['Comments'])
-        end
+      potential_invitation = select { |row| row['RSVP ID'] == id }.first
+      invitation = potential_invitation || Invitation.new.tap { |i| i.id = id }
 
-        i.guests = guest_rows.collect { |row|
-          Guest.new.tap do |g|
-            g.invitation = i
-            g.name = row['Guest Name']
-            g.email_address = nil_for_blank(row['E-mail Address'])
-            g.attending = convert_attending_from_store(row['Attending?'])
-            g.entree_choice = nil_for_blank(row['Entree Choice'])
-          end
-        }
-      end
+      guests.each { |g| g.invitation = invitation }
+      invitation.guests = guests
+
+      invitation
     end
 
     def convert_attending_from_store(store_value)

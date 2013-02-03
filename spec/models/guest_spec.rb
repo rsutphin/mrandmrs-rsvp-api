@@ -11,6 +11,55 @@ describe Guest do
     end
   end
 
+  describe '#invitation_id' do
+    it 'is nil with no invitation' do
+      Guest.new.invitation_id.should be_nil
+    end
+
+    it 'is the invitation ID when there is an invitation' do
+      invitation = Invitation.new.tap { |i| i.id = 'Foo' }
+      Guest.new.tap { |g| g.invitation = invitation }.invitation_id.should == 'Foo'
+    end
+  end
+
+  describe '#invitation_id=' do
+    let(:invitation) { Invitation.new.tap { |i| i.id = 'Foo' } }
+
+    describe 'when there is no associated invitation' do
+      let(:guest) { Guest.new }
+
+      it 'creates an associated invitation record if set to a concrete value' do
+        guest.invitation_id = 'Baz'
+
+        guest.invitation.id.should == 'Baz'
+      end
+
+      it 'does nothing if set to nil' do
+        guest.invitation_id = nil
+
+        guest.invitation.should be_nil
+      end
+    end
+
+    describe 'when there is an associated invitation' do
+      let(:guest) { Guest.new.tap { |g| g.invitation = invitation } }
+
+      it 'fails if the new ID is different' do
+        expect { guest.invitation_id = 'Bar' }.to raise_error(/Cannot change invitation ID for guest nil/)
+      end
+
+      it 'fails if the new ID is nil' do
+        expect { guest.invitation_id = nil }.to raise_error(/Cannot change invitation ID for guest nil/)
+      end
+
+      it 'does nothing if the new ID is the same as the existing' do
+        guest.invitation_id = invitation.id
+
+        guest.invitation.should be(invitation)
+      end
+    end
+  end
+
   describe '#save' do
     let(:invitation_id) { 'GR003' }
 

@@ -26,6 +26,8 @@ class Guest
   attr_accessor :entree_choice
 
   spreadsheet_mapping 'Invitations' do |m|
+    m.value_mapping('RSVP ID', :invitation_id, :identifier => true)
+    m.value_mapping('Guest Name', :name)
     m.value_mapping('E-mail Address', :email_address)
     m.value_mapping('Entree Choice', :entree_choice)
     m.value_mapping('Attending?', :attending,
@@ -38,11 +40,24 @@ class Guest
         when false
           'No'
         end
+      },
+      from_column: lambda { |v|
+        case v
+        when /y/i
+          true
+        when /n/i
+          false
+        else
+          nil
+        end
       }
     )
   end
 
   class << self
+    def find_for_rsvp(rsvp_id)
+      select { |row| row['RSVP ID'] == rsvp_id }
+    end
   end
 
   ##
@@ -53,6 +68,15 @@ class Guest
 
   def invitation_id
     invitation.try(:id)
+  end
+
+  def invitation_id=(invitation_id)
+    if self.invitation
+      return if invitation_id == self.invitation.id
+      fail "Cannot change invitation ID for guest #{name.inspect}"
+    elsif invitation_id
+      self.invitation = Invitation.new.tap { |i| i.id = invitation_id }
+    end
   end
 
   def save

@@ -17,6 +17,16 @@ module SpreadsheetModel
     def sheet_name
       @spreadsheet_mapping.sheet_name
     end
+
+    ##
+    # @return [Array<SpreadsheetModel>] an array of instances built by filtering
+    #   the rows of this model's sheet according to &criteria
+    # @param criteria [Proc] a block that returns true if an instance derived
+    #   from the row it receives should be included in the result set.
+    def select(&criteria)
+      rows = Rails.application.store.get_sheet(sheet_name).try(:select, &criteria) || []
+      rows.map { |row| spreadsheet_mapping.update_instance_from_row(self.new, row) }
+    end
   end
 
   def spreadsheet_mapping
@@ -65,6 +75,16 @@ module SpreadsheetModel
       @value_mappings.each do |map|
         row[map[:column]] = map[:to_column].call(instance.send(map[:attribute]))
       end
+      row
+    end
+
+    ##
+    # @return [instance]
+    def update_instance_from_row(instance, row)
+      @value_mappings.each do |map|
+        instance.send("#{map[:attribute]}=", map[:from_column].call(row[map[:column]]))
+      end
+      instance
     end
   end
 end
