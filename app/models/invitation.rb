@@ -1,5 +1,8 @@
+require 'spreadsheet_model'
+
 class Invitation
   include ActiveModel::SerializerSupport
+  include SpreadsheetModel
 
   ##
   # @return [String] the assigned ID for this invitation.
@@ -18,12 +21,17 @@ class Invitation
   # @return [String,nil] Free-text description from the respondent of which hotel they are staying at.
   attr_accessor :hotel
 
+  spreadsheet_mapping 'Response Notes' do |m|
+    m.value_mapping('Comments', :response_comments)
+    m.value_mapping('Hotel', :hotel)
+  end
+
   class << self
     ##
     # @return [Invitation,nil] matching the ID, otherwise `nil`.
     def find(id)
-      guest_rows = Rails.application.store.get_sheet('Invitations').try(:select) { |row| row['RSVP ID'] == id }
-      notes_row = Rails.application.store.get_sheet('Response Notes').try(:detect) { |row| row['RSVP ID'] == id }
+      guest_rows = Rails.application.store.get_sheet(Guest.sheet_name).try(:select) { |row| row['RSVP ID'] == id }
+      notes_row = Rails.application.store.get_sheet(sheet_name).try(:detect) { |row| row['RSVP ID'] == id }
 
       if guest_rows.blank?
         Rails.logger.debug("No guests for RSVP ID #{id.inspect}")
@@ -64,5 +72,25 @@ class Invitation
     def nil_for_blank(s)
       s.blank? ? nil : s
     end
+    private :nil_for_blank
+  end
+
+  def guests
+    @guests ||= []
+  end
+
+  def save
+    invitation_sheet = Rails.application.store.get_sheet(sheet_name) || []
+    invitation_row = invitation_sheet.detect { |row| row['RSVP ID'] == self.id }
+    unless invitation_row
+      invitation_row = { 'RSVP ID' => self.id }
+      invitation_sheet << invitation_row
+    end
+
+    spreadsheet_mapping.update_row_from_instance(invitation_row, self)
+
+    Rails.application.store.replace_sheet(sheet_name, invitation_sheet)
+
+    self.guests.each { |g| g.save }
   end
 end

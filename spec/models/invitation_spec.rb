@@ -4,7 +4,7 @@ describe Invitation do
   describe 'as DAO' do
     describe '.find' do
       it 'finds an Invitation instance by ID' do
-        store.replace_sheet('Invitations', [
+        store.replace_sheet(Guest.sheet_name, [
           { 'RSVP ID' => 'KR001', 'Guest Name' => 'F' },
           { 'RSVP ID' => 'KR002', 'Guest Name' => 'G' },
           { 'RSVP ID' => 'KR002', 'Guest Name' => 'H' }
@@ -14,7 +14,7 @@ describe Invitation do
       end
 
       it 'gives nil for a non-existent instance' do
-        store.replace_sheet('Invitations', [
+        store.replace_sheet(Guest.sheet_name, [
           { 'RSVP ID' => 'KR002', 'Guest Name' => 'B' }
         ])
 
@@ -22,7 +22,7 @@ describe Invitation do
       end
 
       it 'finds the invitation if there is only guest info' do
-        store.replace_sheet('Invitations', [
+        store.replace_sheet(Guest.sheet_name, [
           { 'RSVP ID' => 'KR002', 'Guest Name' => 'B' }
         ])
 
@@ -30,7 +30,7 @@ describe Invitation do
       end
 
       it 'does not find the invitation if there is only notes info' do
-        store.replace_sheet('Response Notes', [
+        store.replace_sheet(Invitation.sheet_name, [
           { 'RSVP ID' => 'KR002', 'Hotel' => 'A thing' }
         ])
 
@@ -42,14 +42,14 @@ describe Invitation do
         let(:blank_invitation) { Invitation.find('KR123') }
 
         before do
-          store.replace_sheet('Invitations', [
+          store.replace_sheet(Guest.sheet_name, [
             { 'RSVP ID' => 'KR345', 'Guest Name' => 'AP', 'E-mail Address' => 'ap@example.com', 'Attending?' => 'y', 'Entree Choice' => 'Crab' },
             { 'RSVP ID' => 'KR345', 'Guest Name' => 'SP', 'E-mail Address' => 'sp@example.com', 'Attending?' => nil },
             { 'RSVP ID' => 'KR345', 'Guest Name' => 'RP', 'E-mail Address' => '', 'Attending?' => 'n', 'Entree Choice' => '' },
             { 'RSVP ID' => 'KR123', 'Guest Name' => 'ES', 'E-mail Address' => '', 'Attending?' => '', 'Entree Choice' => '' }
           ])
 
-          store.replace_sheet('Response Notes', [
+          store.replace_sheet(Invitation.sheet_name, [
             { 'RSVP ID' => 'KR345', 'Comments' => "Eat at Joe's", 'Hotel' => 'The fancy one by the river' },
             { 'RSVP ID' => 'KR123', 'Comments' => '', 'Hotel' => '' }
           ])
@@ -107,6 +107,98 @@ describe Invitation do
           it 'is nil if blank' do
             blank_invitation.response_comments.should be_nil
           end
+        end
+      end
+    end
+
+    describe '#save' do
+      let(:invitation_id) { 'KR900' }
+
+      let(:invitation) {
+        Invitation.new.tap do |i|
+          i.id = invitation_id
+          i.response_comments = 'Foo'
+          i.hotel = 'Bar'
+        end
+      }
+
+      before do
+        store.replace_sheet(Guest.sheet_name, [
+          { 'RSVP ID' => invitation_id, 'Guest Name' => 'E T C', 'E-mail Address' => 'e@tc' }
+        ])
+      end
+
+      describe 'of invitation attributes' do
+        shared_context 'updating invitation attributes' do
+          before do
+            invitation.save
+          end
+
+          it 'stores response_comments' do
+            Invitation.find(invitation_id).response_comments.
+              should == invitation.response_comments
+          end
+
+          it 'stores hotel' do
+            Invitation.find(invitation_id).hotel.
+              should == invitation.hotel
+          end
+        end
+
+        describe 'when there is an existing row' do
+          before do
+            store.replace_sheet(Invitation.sheet_name, [
+              { 'RSVP ID' => invitation_id, 'Comments' => 'Etc', 'Hotel' => 'Etc' }
+            ])
+          end
+
+          include_context 'updating invitation attributes'
+        end
+
+        describe 'when there is no existing row' do
+          before do
+            store.replace_sheet(Invitation.sheet_name, [
+              { 'RSVP ID' => 'KR111' }
+            ])
+          end
+
+          include_context 'updating invitation attributes'
+        end
+
+        describe 'when the sheet does not exist' do
+          include_context 'updating invitation attributes'
+        end
+      end
+
+      # Further guest saving details are described in guest_spec
+      describe 'cascading to guests' do
+        let(:existing_guest) {
+          Guest.new.tap do |g|
+            g.name = 'E T C'
+            g.email_address = 'e@tc'
+            g.invitation = invitation
+          end
+        }
+
+        let(:new_guest) {
+          Guest.new.tap do |g|
+            g.name = 'Newton'
+            g.invitation = invitation
+          end
+        }
+
+        it 'updates an existing guest' do
+          invitation.guests << existing_guest
+          existing_guest.attending = true
+          invitation.save
+
+          Invitation.find(invitation.id).guests.first.attending.should be_true
+        end
+
+        it 'fails if given a new guest' do
+          invitation.guests << new_guest
+
+          expect { invitation.save }.to raise_error(/Invitation "#{invitation_id}" does not include a guest named "Newton"/)
         end
       end
     end
