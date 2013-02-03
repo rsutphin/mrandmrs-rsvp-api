@@ -1,11 +1,19 @@
 require 'spec_helper'
 
 describe 'routing to invitations' do
-  it 'routes /invitations/:id to invitations#show for code' do
+  it 'routes GET /invitations/:id to invitations#show for code' do
     { :get => 'invitations/ER100' }.should route_to(
       :controller => 'invitations',
       :action => 'show',
       :id => 'ER100'
+    )
+  end
+
+  it 'routes PUT /invitations/:id to invitations#update for code' do
+    { :put => 'invitations/ER200' }.should route_to(
+      :controller => 'invitations',
+      :action => 'update',
+      :id => 'ER200'
     )
   end
 
