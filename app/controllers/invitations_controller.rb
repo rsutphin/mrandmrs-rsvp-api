@@ -10,20 +10,11 @@ class InvitationsController < ApplicationController
   end
 
   def update
-    unless Invitation.exist?(params[:id])
-      response.status = 404
-      render :json => high_level_errors_entity("There is no invitation #{params['id']}. Invitations may not be created with this interface.")
-      return
-    end
+    return unless verify_invitation_exists_before_update
 
     invitation = InvitationSerializer.from_json(params)
 
-    if invitation.id != params['id']
-      response.status = 422
-      render :json => high_level_errors_entity(
-        "Updates for invitation #{invitation.id} must be sent to its resource, #{invitation_path(invitation.id)}.")
-      return
-    end
+    return unless verify_invitation_matches_url(invitation)
 
     invitation.save
   end
@@ -34,5 +25,26 @@ class InvitationsController < ApplicationController
     {
       "errors" => errors
     }
+  end
+
+  def verify_invitation_exists_before_update
+    if Invitation.exist?(params['id'])
+      true
+    else
+      response.status = 404
+      render :json => high_level_errors_entity("There is no invitation #{params['id']}. Invitations may not be created with this interface.")
+      false
+    end
+  end
+
+  def verify_invitation_matches_url(invitation)
+    if invitation.id != params['id']
+      response.status = 422
+      render :json => high_level_errors_entity(
+        "Updates for invitation #{invitation.id} must be sent to its resource, #{invitation_path(invitation.id)}.")
+      false
+    else
+      true
+    end
   end
 end
