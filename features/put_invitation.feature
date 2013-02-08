@@ -228,7 +228,6 @@ Scenario: An unknown invitation
     }
     """
 
-@wip
 Scenario: A mismatch between the invitation ID in the URL and the body
   When I PUT the following JSON to invitations/KR021
     """
@@ -254,8 +253,8 @@ Scenario: A mismatch between the invitation ID in the URL and the body
    And the JSON response is
     """
     {
-      "errors:": [
-        "Updates for invitation KR022 must be sent to its resource, invitations/KR022."
+      "errors": [
+        "Updates for invitation KR022 must be sent to its resource, /invitations/KR022."
       ]
     }
     """
