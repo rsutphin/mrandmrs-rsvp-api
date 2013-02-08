@@ -114,3 +114,20 @@ Scenario: An invitation which has previously been responded to
       ]
     }
     """
+
+@wip
+Scenario: An unknown invitation
+  Given the invitation spreadsheet
+    | RSVP ID | Guest Name        | E-mail Address  |
+    | KR018   | John Fredricksson | jf@example.net  |
+    | KR021   | Emily Carolina    | ec@example.com  |
+  When I GET invitations/EL010
+  Then the response status should be 404
+   And the JSON response is
+    """
+    {
+      "errors": [
+        "There is no invitation EL010."
+      ]
+    }
+    """

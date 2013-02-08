@@ -195,3 +195,67 @@ Scenario: Attempting to add a guest
       ]
     }
     """
+
+@wip
+Scenario: An unknown invitation
+  When I PUT the following JSON to invitations/KR022
+    """
+    {
+      "invitation": {
+        "id": "KR022",
+        "guests": [
+          "emilycarolina"
+        ]
+      },
+
+      "guests": [
+        {
+          "id": "emilycarolina",
+          "attending": false,
+          "name": "Emily Carolina",
+          "email_address": "ec@example.com"
+        }
+      ]
+    }
+    """
+  Then the response status should be 404
+   And the JSON response is
+    """
+    {
+      "errors:": [
+        "There is no invitation KR022. Invitations may not be created with this interface."
+      ]
+    }
+    """
+
+@wip
+Scenario: A mismatch between the invitation ID in the URL and the body
+  When I PUT the following JSON to invitations/KR021
+    """
+    {
+      "invitation": {
+        "id": "KR022",
+        "guests": [
+          "emilycarolina"
+        ]
+      },
+
+      "guests": [
+        {
+          "id": "emilycarolina",
+          "attending": false,
+          "name": "Emily Carolina",
+          "email_address": "ec@example.com"
+        }
+      ]
+    }
+    """
+  Then the response status should be 422
+   And the JSON response is
+    """
+    {
+      "errors:": [
+        "Updates for invitation KR022 must be sent to its resource, invitations/KR022."
+      ]
+    }
+    """
