@@ -28,12 +28,16 @@ Scenario: A valid invitation
       "guests": [
         {
           "id": "emilycarolina",
+          "name": "Emily Carolina",
+          "email_address": "ec@example.com",
           "attending": true,
           "entree_choice": "Cheddar-pickle sandwich"
         },
         {
           "id": "johnfredricksson",
-          "attending": false
+          "attending": false,
+          "name": "John Fredricksson",
+          "email_address": "jf@example.net"
         }
       ]
     }
@@ -89,7 +93,9 @@ Scenario: Attempting to remove a guest
       "guests": [
         {
           "id": "emilycarolina",
-          "attending": false
+          "attending": false,
+          "name": "Emily Carolina",
+          "email_address": "ec@example.com"
         }
       ]
     }
@@ -127,15 +133,21 @@ Scenario: Attempting to add a guest
         {
           "id": "emilycarolina",
           "attending": true,
-          "entree_choice": "Cheddar-pickle sandwich"
+          "entree_choice": "Cheddar-pickle sandwich",
+          "name": "Emily Carolina",
+          "email_address": "ec@example.com"
         },
         {
           "id": "johnfredricksson",
-          "attending": false
+          "attending": false,
+          "name": "John Fredricksson",
+          "email_address": "jf@example.net"
         },
         {
           "id": "abelincoln",
-          "attending": false
+          "attending": false,
+          "name": "Abe Lincoln",
+          "email_address": "al@example.net"
         }
       ]
     }
