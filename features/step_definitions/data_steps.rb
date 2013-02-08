@@ -1,4 +1,4 @@
-Given /^the invitation spreadsheet$/ do |table|
+Given /^the guest spreadsheet$/ do |table|
   # table is a Cucumber::Ast::Table
   Rails.application.store.replace_sheet(Guest.sheet_name, table.hashes)
 end

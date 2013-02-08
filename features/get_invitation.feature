@@ -4,7 +4,7 @@ Feature: GET an invitation
   I want to give invitation details when given an RSVP code
 
 Scenario: A new single-person invitation
-  Given the invitation spreadsheet
+  Given the guest spreadsheet
     | RSVP ID | Guest Name        | E-mail Address |
     | KR018   | John Fredricksson | jf@example.net |
     | KR021   | Emily Carolina    | ec@example.com |
@@ -34,7 +34,7 @@ Scenario: A new single-person invitation
     """
 
 Scenario: A new multiple-person invitation
-  Given the invitation spreadsheet
+  Given the guest spreadsheet
     | RSVP ID | Guest Name        | E-mail Address  |
     | KR018   | John Fredricksson | jf@example.net  |
     | KR021   | Emily Carolina    | ec@example.com  |
@@ -83,7 +83,7 @@ Scenario: A new multiple-person invitation
     """
 
 Scenario: An invitation which has previously been responded to
-  Given the invitation spreadsheet
+  Given the guest spreadsheet
     | RSVP ID | Guest Name        | E-mail Address | Attending? | Entree Choice |
     | KR018   | John Fredricksson | jf@example.net |            |               |
     | KR021   | Emily Carolina    | ec@example.com | y          | Veg. Lasagna  |
@@ -117,7 +117,7 @@ Scenario: An invitation which has previously been responded to
 
 @wip
 Scenario: An unknown invitation
-  Given the invitation spreadsheet
+  Given the guest spreadsheet
     | RSVP ID | Guest Name        | E-mail Address  |
     | KR018   | John Fredricksson | jf@example.net  |
     | KR021   | Emily Carolina    | ec@example.com  |

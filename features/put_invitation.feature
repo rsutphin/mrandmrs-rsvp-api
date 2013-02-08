@@ -4,7 +4,7 @@ Feature: PUT an invitation
   I want to accept and store invitation updates
 
 Background:
-  Given the invitation spreadsheet
+  Given the guest spreadsheet
     | RSVP ID | Guest Name        | E-mail Address |
     | KR021   | John Fredricksson | jf@example.net |
     | KR021   | Emily Carolina    | ec@example.com |
