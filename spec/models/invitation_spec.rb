@@ -1,4 +1,5 @@
 require 'spec_helper'
+require_relative 'active_model_behaviors'
 
 describe Invitation do
   describe 'as DAO' do
@@ -238,5 +239,11 @@ describe Invitation do
         end
       end
     end
+  end
+
+  context '' do
+    let(:record) { Invitation.new.tap { |i| i.id = 'FO000' } }
+
+    it_behaves_like 'an ActiveModel instance in this project'
   end
 end

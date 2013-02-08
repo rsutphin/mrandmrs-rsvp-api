@@ -1,11 +1,17 @@
+require 'spreadsheet_model/active_model_adapter'
+
 ##
 # Shared logic for spreadsheet-backed models. This is specific to this project
 # and should not be reused without some refactoring. (In particular, it is only
 # tested through its effects on the behaviors of the models in this system.)
 module SpreadsheetModel
   extend ActiveSupport::Concern
+  include SpreadsheetModel::ActiveModelAdapter
+  include ActiveModel::Validations
 
   module ClassMethods
+    include SpreadsheetModel::ActiveModelAdapter::ClassMethods
+
     def spreadsheet_mapping(sheet_name=nil, &block)
       if sheet_name
         @spreadsheet_mapping = Mapping.new(sheet_name, &block)

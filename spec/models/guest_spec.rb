@@ -1,4 +1,5 @@
 require 'spec_helper'
+require_relative 'active_model_behaviors'
 
 describe Guest do
   describe '#id' do
@@ -134,5 +135,11 @@ describe Guest do
         expect { guest.save }.to raise_error(/Invitation "GR003" does not include a guest named "Pony"/)
       end
     end
+  end
+
+  context '' do
+    let(:record) { Guest.new.tap { |g| g.name = 'Seventeen Elf' } }
+
+    it_behaves_like 'an ActiveModel instance in this project'
   end
 end
