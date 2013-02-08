@@ -111,6 +111,42 @@ describe Invitation do
       end
     end
 
+    describe '.exist?' do
+      let(:invitation_id) { 'KR900' }
+
+      describe 'when there is a guest with the ID' do
+        before do
+          store.replace_sheet(Guest.sheet_name, [
+            { 'RSVP ID' => invitation_id, 'Guest Name' => 'E T C', 'E-mail Address' => 'e@tc' }
+          ])
+        end
+
+        it 'is true' do
+          Invitation.exist?(invitation_id).should be_true
+        end
+      end
+
+      describe 'when there is no guest with that ID' do
+        before do
+          store.replace_sheet(Guest.sheet_name, [
+            { 'RSVP ID' => 'KR009', 'Guest Name' => 'E T C', 'E-mail Address' => 'e@tc' }
+          ])
+        end
+
+        it 'is false' do
+          Invitation.exist?(invitation_id).should be_false
+        end
+
+        it 'is false even if there is an invitation row with that ID' do
+          store.replace_sheet(Invitation.sheet_name, [
+            { 'RSVP ID' => invitation_id  }
+          ])
+
+          Invitation.exist?(invitation_id).should be_false
+        end
+      end
+    end
+
     describe '#save' do
       let(:invitation_id) { 'KR900' }
 

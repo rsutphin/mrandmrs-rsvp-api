@@ -196,7 +196,6 @@ Scenario: Attempting to add a guest
     }
     """
 
-@wip
 Scenario: An unknown invitation
   When I PUT the following JSON to invitations/KR022
     """
@@ -222,7 +221,7 @@ Scenario: An unknown invitation
    And the JSON response is
     """
     {
-      "errors:": [
+      "errors": [
         "There is no invitation KR022. Invitations may not be created with this interface."
       ]
     }

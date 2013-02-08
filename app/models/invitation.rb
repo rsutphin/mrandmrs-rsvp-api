@@ -47,6 +47,10 @@ class Invitation
       invitation
     end
 
+    def exist?(id)
+      !Guest.find_for_rsvp(id).empty?
+    end
+
     def convert_attending_from_store(store_value)
       case store_value
       when /y/i

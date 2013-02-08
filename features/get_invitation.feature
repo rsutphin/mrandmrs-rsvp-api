@@ -115,7 +115,6 @@ Scenario: An invitation which has previously been responded to
     }
     """
 
-@wip
 Scenario: An unknown invitation
   Given the guest spreadsheet
     | RSVP ID | Guest Name        | E-mail Address  |
