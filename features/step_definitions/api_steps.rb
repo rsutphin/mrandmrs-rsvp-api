@@ -11,6 +11,6 @@ Then /^the JSON response is$/ do |string|
   JSON.parse(http.response.body).should == JSON.parse(string)
 end
 
-Then /^the response status should be (\d+)$/ do |status_code|
+Then /^the response status is (\d+)$/ do |status_code|
   http.response.status.should == status_code.to_i
 end

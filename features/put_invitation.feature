@@ -41,7 +41,7 @@ Scenario: A valid invitation
       ]
     }
     """
-  Then the response status should be 200
+  Then the response status is 200
    And I GET invitations/KR021
   Then the JSON response is
     """
@@ -99,7 +99,7 @@ Scenario: Attempting to remove a guest
       ]
     }
     """
-  Then the response status should be 422
+  Then the response status is 422
    And the JSON response is
     """
     {
@@ -151,7 +151,7 @@ Scenario: Attempting to add a guest
       ]
     }
     """
-  Then the response status should be 422
+  Then the response status is 422
    And the JSON response is
     """
     {
@@ -218,7 +218,7 @@ Scenario: An unknown invitation
       ]
     }
     """
-  Then the response status should be 404
+  Then the response status is 404
    And the JSON response is
     """
     {
@@ -250,7 +250,7 @@ Scenario: A mismatch between the invitation ID in the URL and the body
       ]
     }
     """
-  Then the response status should be 422
+  Then the response status is 422
    And the JSON response is
     """
     {

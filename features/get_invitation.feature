@@ -122,7 +122,7 @@ Scenario: An unknown invitation
     | KR018   | John Fredricksson | jf@example.net  |
     | KR021   | Emily Carolina    | ec@example.com  |
   When I GET invitations/EL010
-  Then the response status should be 404
+  Then the response status is 404
    And the JSON response is
     """
     {
