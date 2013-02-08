@@ -10,7 +10,6 @@ Background:
     | KR021   | Emily Carolina    | ec@example.com |
 
 
-@wip
 Scenario: A valid invitation
   When I PUT the following JSON to invitations/KR021
     """

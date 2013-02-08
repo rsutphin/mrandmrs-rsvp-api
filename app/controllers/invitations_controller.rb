@@ -5,6 +5,7 @@ class InvitationsController < ApplicationController
   end
 
   def update
-    
+    invitation = InvitationSerializer.from_json(params)
+    invitation.save
   end
 end
