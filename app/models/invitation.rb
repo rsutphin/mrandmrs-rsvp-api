@@ -21,6 +21,8 @@ class Invitation
   # @return [String,nil] Free-text description from the respondent of which hotel they are staying at.
   attr_accessor :hotel
 
+  validates_length_of :response_comments, :hotel, :maximum => 16384
+
   spreadsheet_mapping 'Response Notes' do |m|
     m.value_mapping('RSVP ID', :id, :identifier => true)
     m.value_mapping('Comments', :response_comments)

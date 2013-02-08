@@ -246,4 +246,26 @@ describe Invitation do
 
     it_behaves_like 'an ActiveModel instance in this project'
   end
+
+  describe 'validation' do
+    let(:invitation) {
+      Invitation.new.tap { |i|
+        i.id = 'FO000'
+      }
+    }
+
+    %w(response_comments hotel).each do |string_attribute|
+      describe "of ##{string_attribute}" do
+        it 'is invalid when very long' do
+          invitation.send("#{string_attribute}=", 'foo' * 6000)
+          invitation.should_not be_valid
+
+          invitation.errors[string_attribute].should == [
+            "is too long (maximum is 16384 characters)"
+          ]
+        end
+      end
+    end
+
+  end
 end

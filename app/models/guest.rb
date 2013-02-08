@@ -25,6 +25,11 @@ class Guest
   # @return [String,nil] entree choice.
   attr_accessor :entree_choice
 
+  validates_inclusion_of :attending, :in => [true, false, nil], :message => "invalid value for attending"
+  validates_presence_of :entree_choice, :if => lambda { |rec| rec.attending },
+    :message => 'must be selected when attending'
+  validates_length_of :name, :email_address, :entree_choice, :maximum => 1024
+
   spreadsheet_mapping 'Invitations' do |m|
     m.value_mapping('RSVP ID', :invitation_id, :identifier => true)
     m.value_mapping('Guest Name', :name)

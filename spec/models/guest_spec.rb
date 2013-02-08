@@ -61,6 +61,99 @@ describe Guest do
     end
   end
 
+  describe 'validation' do
+    let(:guest) {
+      Guest.new.tap { |g|
+        g.name = 'Amenda'
+        g.invitation_id = 'KR049'
+        g.entree_choice = 'Pickles'
+      }
+    }
+
+    before do
+      store.replace_sheet(Guest.sheet_name, [
+        { 'RSVP ID' => guest.invitation_id, 'Guest Name' => guest.name },
+      ])
+
+      # base object should be valid
+      guest.should be_valid
+    end
+
+    describe 'of #attending' do
+      [true, false, nil].each do |valid_value|
+        it "is valid when attending=#{valid_value.inspect}" do
+          guest.attending = valid_value
+          guest.should be_valid
+        end
+      end
+
+      {
+        :integer => 9,
+        :string => 'foo'
+      }.each do |invalid_type, example_value|
+        it "is invalid with an #{invalid_type}" do
+          guest.attending = example_value
+          guest.should_not be_valid
+
+          guest.errors[:attending].should == [
+            "invalid value for attending"
+          ]
+        end
+      end
+    end
+
+    describe 'of #entree_choice' do
+      describe 'when attending is true' do
+        before do
+          guest.attending = true
+        end
+
+        it 'is valid when set' do
+          guest.entree_choice = 'Taco'
+          guest.should be_valid
+        end
+
+        it 'is not valid when not set' do
+          guest.entree_choice = nil
+          guest.should_not be_valid
+
+          guest.errors[:entree_choice].should == [
+            "must be selected when attending"
+          ]
+        end
+      end
+
+      describe 'when attending is not true' do
+        before do
+          guest.attending = false
+        end
+
+        it 'is valid when set' do
+          guest.entree_choice = 'Taco'
+          guest.should be_valid
+        end
+
+        it 'is valid when not set' do
+          guest.entree_choice = nil
+          guest.should be_valid
+        end
+      end
+    end
+
+    %w(name entree_choice email_address).each do |string_attribute|
+      describe "of ##{string_attribute}" do
+        it 'is invalid when very long' do
+          guest.send("#{string_attribute}=", 'foo' * 600)
+          guest.should_not be_valid
+
+          guest.errors[string_attribute].should == [
+            "is too long (maximum is 1024 characters)"
+          ]
+        end
+      end
+    end
+  end
+
   describe '#save' do
     let(:invitation_id) { 'GR003' }
 
