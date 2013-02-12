@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.10'
+gem 'rails', '3.2.12'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
@@ -9,9 +9,9 @@ gem 'rails-api'
 gem 'active_model_serializers'
 
 group :development, :test do
-  gem 'rspec-rails'
+  gem 'rspec-rails', '~> 2.12'
 
-  gem 'cucumber-rails', :require => false
+  gem 'cucumber-rails', '~> 1.2', :require => false
 end
 
 # To use ActiveModel has_secure_password
