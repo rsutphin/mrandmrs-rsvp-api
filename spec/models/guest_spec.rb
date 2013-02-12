@@ -140,15 +140,30 @@ describe Guest do
       end
     end
 
+    describe 'of #name' do
+      it 'is valid if it is the persisted value' do
+        guest.should be_valid
+      end
+
+      it 'is not valid if it differs from the peristed value' do
+        guest.name = 'Blender'
+        guest.should_not be_valid
+
+        guest.errors[:name].should == [
+          "may not be changed"
+        ]
+      end
+    end
+
     %w(name entree_choice email_address).each do |string_attribute|
       describe "of ##{string_attribute}" do
         it 'is invalid when very long' do
           guest.send("#{string_attribute}=", 'foo' * 600)
           guest.should_not be_valid
 
-          guest.errors[string_attribute].should == [
+          guest.errors[string_attribute].should include(
             "is too long (maximum is 1024 characters)"
-          ]
+          )
         end
       end
     end

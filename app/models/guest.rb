@@ -30,6 +30,8 @@ class Guest
     :message => 'must be selected when attending'
   validates_length_of :name, :email_address, :entree_choice, :maximum => 1024
 
+  validate :no_name_changes
+
   spreadsheet_mapping 'Invitations' do |m|
     m.value_mapping('RSVP ID', :invitation_id, :identifier => true)
     m.value_mapping('Guest Name', :name)
@@ -81,6 +83,13 @@ class Guest
       fail "Cannot change invitation ID for guest #{name.inspect}"
     elsif invitation_id
       self.invitation = Invitation.new.tap { |i| i.id = invitation_id }
+    end
+  end
+
+  def no_name_changes
+    stored_names = self.class.find_for_rsvp(self.invitation_id).collect(&:name)
+    unless stored_names.include?(self.name)
+      errors.add(:name, "may not be changed")
     end
   end
 
