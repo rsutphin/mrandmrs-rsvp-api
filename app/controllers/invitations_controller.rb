@@ -17,6 +17,7 @@ class InvitationsController < ApplicationController
     return unless verify_invitation_matches_url(invitation)
 
     invitation.save
+    render :json => { 'ok' => true }
   end
 
   private

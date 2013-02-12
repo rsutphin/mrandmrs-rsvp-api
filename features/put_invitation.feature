@@ -42,8 +42,12 @@ Scenario: A valid invitation
     }
     """
   Then the response status is 200
-   And I GET invitations/KR021
-  Then the JSON response is
+   And the JSON response is
+    """
+    { "ok": true }
+    """
+  Then I GET invitations/KR021
+   And the JSON response is
     """
     {
       "invitation": {
