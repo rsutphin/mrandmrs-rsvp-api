@@ -256,6 +256,11 @@ describe Invitation do
 
     %w(response_comments hotel).each do |string_attribute|
       describe "of ##{string_attribute}" do
+        it 'is valid when a reasonable length' do
+          invitation.send("#{string_attribute}=", 'foo' * 50)
+          invitation.should be_valid
+        end
+
         it 'is invalid when very long' do
           invitation.send("#{string_attribute}=", 'foo' * 6000)
           invitation.should_not be_valid
@@ -267,5 +272,48 @@ describe Invitation do
       end
     end
 
+    describe 'of guests' do
+      before do
+        store.replace_sheet(Guest.sheet_name, [
+          { 'RSVP ID' => invitation.id, 'Guest Name' => 'Alpha' },
+          { 'RSVP ID' => invitation.id, 'Guest Name' => 'Beta' }
+        ])
+
+        store.replace_sheet(Invitation.sheet_name, [
+          { 'RSVP ID' => invitation.id }
+        ])
+      end
+
+      def add_guest(name)
+        g = Guest.new.tap { |g| g.name = name; g.invitation = invitation }
+        invitation.guests << g
+      end
+
+      it 'prevents removing a guest' do
+        add_guest('Alpha')
+        invitation.should_not be_valid
+
+        invitation.errors['guests'].should == [
+          "cannot remove a guest"
+        ]
+      end
+
+      it 'accepts the same guests' do
+        add_guest('Beta')
+        add_guest('Alpha')
+        invitation.should be_valid
+      end
+
+      it 'prevents adding another guest' do
+        add_guest('Alpha')
+        add_guest('Gamma')
+        add_guest('Beta')
+        invitation.should_not be_valid
+
+        invitation.errors['guests'].should == [
+          "cannot add a guest"
+        ]
+      end
+    end
   end
 end

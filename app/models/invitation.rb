@@ -23,6 +23,8 @@ class Invitation
 
   validates_length_of :response_comments, :hotel, :maximum => 16384
 
+  validate :no_guest_entry_changes
+
   spreadsheet_mapping 'Response Notes' do |m|
     m.value_mapping('RSVP ID', :id, :identifier => true)
     m.value_mapping('Comments', :response_comments)
@@ -56,6 +58,19 @@ class Invitation
 
   def guests
     @guests ||= []
+  end
+
+  def no_guest_entry_changes
+    stored_guests = self.class.find(self.id).try(:guests) || []
+    no_new_guests = self.guests.all? do |g|
+      stored_guests.any? { |sg| sg.id == g.id }
+    end
+    no_missing_guests = stored_guests.all? do |sg|
+      self.guests.any? { |g| sg.id == g.id }
+    end
+
+    errors.add('guests', 'cannot add a guest') unless no_new_guests
+    errors.add('guests', 'cannot remove a guest') unless no_missing_guests
   end
 
   def save
