@@ -16,8 +16,23 @@ class InvitationsController < ApplicationController
 
     return unless verify_invitation_matches_url(invitation)
 
-    invitation.save
-    render :json => { 'ok' => true }
+    if invitation.valid? && invitation.guests.all? { |g| g.valid? }
+      invitation.save
+      render :json => { 'ok' => true }
+    else
+      response.status = 422
+
+      error_response = {}
+      if inv_e = error_pod(invitation)
+        error_response['invitation'] = inv_e
+      end
+      guest_es = invitation.guests.collect { |g| error_pod(g) }.compact
+      unless guest_es.empty?
+        error_response['guests'] = guest_es
+      end
+
+      render :json => error_response
+    end
   end
 
   private
@@ -26,6 +41,14 @@ class InvitationsController < ApplicationController
     {
       "errors" => errors
     }
+  end
+
+  def error_pod(model)
+    if model.errors.empty?
+      nil
+    else
+      { "id" => model.id, "errors" => model.errors.as_json }
+    end
   end
 
   def verify_invitation_exists_before_update

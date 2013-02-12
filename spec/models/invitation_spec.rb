@@ -314,6 +314,16 @@ describe Invitation do
           "cannot add a guest"
         ]
       end
+
+      it 'is invalid when a guest is invalid' do
+        pending 'It seems like this should be simple, but it is not.'
+
+        add_guest('Beta')
+        add_guest('Alpha')
+        invitation.guests.first.attending = 'frob'
+
+        invitation.should_not be_valid
+      end
     end
   end
 end

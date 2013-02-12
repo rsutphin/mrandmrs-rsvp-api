@@ -79,7 +79,6 @@ Scenario: A valid invitation
     }
     """
 
-@wip
 Scenario: Attempting to remove a guest
   When I PUT the following JSON to invitations/KR021
     """
@@ -110,13 +109,12 @@ Scenario: Attempting to remove a guest
       "invitation": {
         "id": "KR021",
         "errors": {
-          "guests": ["Guests may not be removed via this interface."]
+          "guests": ["cannot remove a guest"]
         }
       }
     }
     """
 
-@wip
 Scenario: Attempting to add a guest
   When I PUT the following JSON to invitations/KR021
     """
@@ -162,7 +160,7 @@ Scenario: Attempting to add a guest
       "invitation": {
         "id": "KR021",
         "errors": {
-          "guests": ["Guests may not be added via this interface."]
+          "guests": ["cannot add a guest"]
         }
       }
     }
@@ -199,6 +197,55 @@ Scenario: Attempting to add a guest
       ]
     }
     """
+
+Scenario: Providing an invalid attribute value
+  When I PUT the following JSON to invitations/KR021
+    """
+    {
+      "invitation": {
+        "id": "KR021",
+        "guests": [
+          "johnfredricksson",
+          "emilycarolina"
+        ],
+        "response_comments": "Neat-o",
+        "hotel": "Crowne Plaza"
+      },
+
+      "guests": [
+        {
+          "id": "emilycarolina",
+          "name": "Emily Carolina",
+          "email_address": "ec@example.com",
+          "attending": "pickles",
+          "entree_choice": "Cheddar-pickle sandwich"
+        },
+        {
+          "id": "johnfredricksson",
+          "attending": false,
+          "name": "John Fredricksson",
+          "email_address": "jf@example.net"
+        }
+      ]
+    }
+    """
+  Then the response status is 422
+   And the JSON response is
+    """
+    {
+      "guests": [
+        {
+          "id": "emilycarolina",
+          "errors": {
+            "attending": [
+              "invalid value for attending"
+            ]
+          }
+        }
+      ]
+    }
+    """
+
 
 Scenario: An unknown invitation
   When I PUT the following JSON to invitations/KR022
