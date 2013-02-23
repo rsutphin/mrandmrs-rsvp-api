@@ -1,4 +1,4 @@
-Arch:
+# Arch
 
 M
 -
@@ -40,3 +40,18 @@ PUT /invitations/{id}
 Because the IDs will need to be human-readable and typeable (and so short),
 there should be some anti-brute-forcing security for both of these. Design
 pending.
+
+# Google OAuth
+
+This project uses Google OAuth's Device profile to get access to the persistence
+spreadsheet. The client secret and client id need to be in
+config/google_oauth.yml formatted like so:
+
+    client_id: abcdef.apps.googleusercontent.com
+    client_secret: ABC-XFT
+
+To do an initial setup, run
+
+    $ rake initial_device_oauth
+
+And follow its directions. This needs to be done once per deployment.

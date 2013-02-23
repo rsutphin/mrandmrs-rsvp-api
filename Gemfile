@@ -8,6 +8,11 @@ gem 'rails', '3.2.12'
 gem 'rails-api'
 gem 'active_model_serializers'
 
+gem 'sqlite3'
+
+gem 'faraday'
+gem 'faraday_middleware'
+
 group :development, :test do
   gem 'rspec-rails', '~> 2.12'
 
