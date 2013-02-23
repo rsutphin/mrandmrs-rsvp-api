@@ -15,7 +15,7 @@ class GoogleDeviceOAuth
   ##
   # Performs the initial device profile setup. Creates the SQLite database that
   # holds the tokens. Provides instructions at the console.
-  def initial_setup
+  def initial_setup!
     setup_token_database
 
     device_result = perform_device_request
@@ -43,34 +43,34 @@ class GoogleDeviceOAuth
   private :token_database
 
   def setup_token_database
-    token_database.execute 'DROP TABLE IF EXISTS token'
     token_database.execute <<-SQL
-      CREATE TABLE token (
+      CREATE TABLE IF NOT EXISTS token (
         access_token TEXT,
         token_type TEXT,
         expires_in INTEGER,
         created_at TEXT,
         refresh_token TEXT
-      )
+      );
     SQL
   end
   private :setup_token_database
 
   def store_token_record(token_json_response, from_when=Time.now)
     token_database.transaction(:exclusive) do
-      token_database.execute <<-SQL
-        INSERT INTO token (
-          access_token, token_type, expires_in, created_at, refresh_token
-        ) VALUES (
-          '#{token_json_response['access_token']}',
-          '#{token_json_response['token_type']}',
-          #{token_json_response['expires_in']},
-          '#{from_when.utc.iso8601}',
-          '#{token_json_response['refresh_token']}'
-        )
+      insert = <<-SQL
+        INSERT INTO token (access_token, token_type, expires_in, created_at, refresh_token)
+        VALUES (?, ?, ?, ?, ?)
       SQL
+      token_database.execute(insert,
+        token_json_response['access_token'],
+        token_json_response['token_type'],
+        token_json_response['expires_in'],
+        from_when.utc.iso8601,
+        token_json_response['refresh_token']
+      )
     end
   end
+  private :store_token_record
 
   def accounts_connection
     @accounts_connection ||= Faraday::Connection.new(:url => 'https://accounts.google.com/') do |f|
