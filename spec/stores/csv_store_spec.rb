@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'stores/basic_store_behaviors'
 
 describe CsvStore do
   describe '#initialize' do
@@ -20,76 +21,28 @@ describe CsvStore do
   end
 
   describe '#get_sheet' do
-    let(:sheet_name) { 'Frobs' }
     let(:expected_filename) { directory + "#{sheet_name}.csv" }
-    let(:sheet) { store.get_sheet(sheet_name) }
 
-    before do
+    def write_test_sheet(*rows)
       expected_filename.open('w') do |f|
-        f.puts 'H1,H3,H7,H2'
-        f.puts 'A,B,Q,Eleven'
-        f.puts 'B,6,H,Seven'
+        rows.each do |row|
+          f.puts row.join(',')
+        end
       end
     end
 
-    it 'returns an enumerable of indexed rows' do
-      sheet.collect { |row| row.respond_to?(:[]) }.uniq.should be_true
-    end
-
-    it 'returns all the rows from the sheet' do
-      sheet.size.should == 2
-    end
-
-    it 'returns all the columns from the sheet' do
-      sheet.collect(&:keys).uniq.should == [%w(H1 H3 H7 H2)]
-    end
-
-    it 'returns the rows in order' do
-      sheet.collect { |row| row['H3'] }.should == %w(B 6)
-    end
-
-    it 'returns nil for an unknown sheet' do
-      store.get_sheet('Zap').should be_nil
-    end
+    include_context 'a sheet getter'
   end
 
   describe '#replace_sheet' do
-    let(:sheet_name) { 'Invites' }
     let(:expected_filename) { (directory + "#{sheet_name}.csv") }
 
-    shared_context 'sheet replacement' do
-      before do
-        store.replace_sheet(sheet_name, [{ 'A' => '3', 'C' => '6'}, { 'B' => '1', 'C' => '8' }])
-      end
+    def row(n)
+      CSV.read(expected_filename.to_s)[n]
+    end
 
-      def row(n)
-        CSV.read(expected_filename.to_s)[n]
-      end
-
-      it 'creates the header row according to the keys given' do
-        row(0).should == %w(A C B)
-      end
-
-      it 'creates one row per input hash' do
-        expected_filename.readlines.size.should == 3 # incl. header
-      end
-
-      it 'puts values with the same key in the same column' do
-        [
-          row(1)[1],
-          row(2)[1]
-        ].should == %w(6 8)
-      end
-
-      it 'puts values with different keys in different hashes in different columns' do
-        [
-          row(1)[0], row(1)[2],
-          row(2)[0], row(2)[2]
-        ].should == [
-          '3', nil,
-          nil, '1'
-        ]
-      end
+    def test_sheet_row_count
+      expected_filename.readlines.size
     end
 
     describe 'when the sheet does not exist' do
@@ -97,7 +50,7 @@ describe CsvStore do
         expected_filename.exist?.should be_true
       end
 
-      include_context 'sheet replacement'
+      include_context 'a sheet replacer'
     end
 
     describe 'when the sheet already exists' do
@@ -113,7 +66,7 @@ describe CsvStore do
         expected_filename.read.should_not =~ /F/
       end
 
-      include_context 'sheet replacement'
+      include_context 'a sheet replacer'
     end
   end
 
