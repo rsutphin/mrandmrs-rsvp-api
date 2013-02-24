@@ -5,7 +5,7 @@ module RsvpApi
   class InsertCardGenerator
     PAGE_SIZE = [8.5.in, 11.in]
     MARGIN = 0.25.in
-    COLS_ROWS = [2, 4]
+    COLS_ROWS = [2, 3]
 
     CARD_SIZE = [0, 1].collect { |i|
       (PAGE_SIZE[i] - MARGIN * 2) / COLS_ROWS[i]
@@ -84,10 +84,22 @@ module RsvpApi
 
         pdf.formatted_text_box [
           instruction_block("To RSVP, please visit "),
-          instruction_block("http://mrandmrs.sutph.in/rsvp.html", :styles => [:underline]),
+          instruction_block("http://mrandmrs.sutph.in/rsvp.html", :styles => [:underline], :color => '606060'),
           instruction_block(" before April 18 and enter\n"),
           { :text => "#{invitation.id}\n", :size => 54, :color => '333333', :styles => [:italic] },
-        ], :align => :center, :at => [0, pdf.bounds.height / 2 + (60) / 2], :width => card_width
+        ], :align => :center, :at => [0, pdf.bounds.height / 3 * 2 + 10], :width => card_width
+
+        food_highlight = { :color => '606060' }
+        pdf.formatted_text_box [
+          instruction_block("When you RSVP, we will ask for an entree selection for each guest.\n"),
+          instruction_block("The options are "),
+          instruction_block("beef brisket", food_highlight),
+          instruction_block(", "),
+          instruction_block("pork loin", food_highlight),
+          instruction_block(", or "),
+          instruction_block("black bean and faro cakes", food_highlight),
+          instruction_block(".")
+        ], :align => :center, :at => [0, pdf.bounds.height / 3 - 15], :width => card_width
 
         pdf.formatted_text [
           {
