@@ -12,6 +12,8 @@ gem 'faraday'
 gem 'faraday_middleware'
 gem 'google_drive'
 
+gem 'prawn', :require => false
+
 group :development, :test do
   gem 'rspec-rails', '~> 2.12'
 

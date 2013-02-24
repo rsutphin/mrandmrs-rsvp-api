@@ -15,3 +15,6 @@
 /tmp
 
 /config/google_oauth.yml
+
+/fonts
+*.pdf
