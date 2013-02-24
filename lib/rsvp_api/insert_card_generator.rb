@@ -66,6 +66,10 @@ module RsvpApi
       end
     end
 
+    def instruction_format
+      @instruction_format ||= { :font => 'Futura Condensed', :size => 10, :color => '888888' }
+    end
+
     def draw_rsvp_card(pdf, row, col, invitation)
       $stderr.puts "[#{row}, #{col}] #{invitation.card_names.strip}"
 
@@ -78,12 +82,10 @@ module RsvpApi
             :size => 13, :color => '444444' },
         ], :align => :center, :valign => :top
 
-        instruction_format = { :font => 'Futura Condensed', :size => 10, :color => '888888' }
-
         pdf.formatted_text_box [
-          { :text => "To RSVP, please visit " }.merge(instruction_format),
-          { :text => "http://mrandmrs.sutph.in/rsvp.html", :styles => [:underline] }.merge(instruction_format),
-          { :text => " before April 18 and enter\n" }.merge(instruction_format),
+          instruction_block("To RSVP, please visit "),
+          instruction_block("http://mrandmrs.sutph.in/rsvp.html", :styles => [:underline]),
+          instruction_block(" before April 18 and enter\n"),
           { :text => "#{invitation.id}\n", :size => 54, :color => '333333', :styles => [:italic] },
         ], :align => :center, :at => [0, pdf.bounds.height / 2 + (60) / 2], :width => card_width
 
@@ -95,6 +97,10 @@ module RsvpApi
 
         # pdf.stroke_bounds
       end
+    end
+
+    def instruction_block(text, other_options={})
+      instruction_format.merge(:text => text).merge(other_options)
     end
 
     def register_futura(pdf)
