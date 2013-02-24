@@ -112,6 +112,48 @@ describe Invitation do
       end
     end
 
+    describe '.all' do
+      before do
+        app_store.replace_sheet(Guest.sheet_name, [
+          { 'RSVP ID' => 'KR001', 'Guest Name' => 'F' },
+          { 'RSVP ID' => 'KR002', 'Guest Name' => 'G' },
+          { 'RSVP ID' => 'KR002', 'Guest Name' => 'H' },
+          { 'RSVP ID' => 'KR003', 'Guest Name' => 'I' }
+        ])
+
+        app_store.replace_sheet(Invitation.sheet_name, [
+          { 'RSVP ID' => 'KR002', 'Hotel' => 'Madison Radisson' },
+          { 'RSVP ID' => 'KR100', 'Response Notes' => 'Where is everyone?' }
+        ])
+      end
+
+      let(:all) { Invitation.all }
+
+      it 'finds all the invitations' do
+        all.size.should == 3
+      end
+
+      it 'does not include ones without guests' do
+        all.collect(&:id).should_not include('KR100')
+      end
+
+      it 'does include ones without response notes' do
+        all.collect(&:id).should include('KR001')
+      end
+
+      it 'associates the guests with the correct invitations' do
+        all.each_with_object({}) { |i, map| map[i.id] = i.guests.collect(&:name) }.should == {
+          'KR001' => %w(F),
+          'KR002' => %w(G H),
+          'KR003' => %w(I)
+        }
+      end
+
+      it 'loads invitation attributes' do
+        all.find { |i| i.id == 'KR002' }.hotel.should == 'Madison Radisson'
+      end
+    end
+
     describe '.exist?' do
       let(:invitation_id) { 'KR900' }
 

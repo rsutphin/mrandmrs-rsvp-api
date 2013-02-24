@@ -45,14 +45,33 @@ class Invitation
       potential_invitation = select { |row| row['RSVP ID'] == id }.first
       invitation = potential_invitation || Invitation.new.tap { |i| i.id = id }
 
-      guests.each { |g| g.invitation = invitation }
-      invitation.guests = guests
+      associate_invitation_and_guests(invitation, guests)
 
       invitation
     end
 
+    def associate_invitation_and_guests(invitation, guests)
+      guests.each { |g| g.invitation = invitation }
+      invitation.guests = guests
+    end
+    private :associate_invitation_and_guests
+
     def exist?(id)
       !Guest.find_for_rsvp(id).empty?
+    end
+
+    def all
+      guests_by_rsvp_id = Guest.all_raw.each_with_object({}) { |g, index| (index[g.invitation_id] ||= []) << g }
+      invitations_by_rsvp_id = all_raw.select { |i| guests_by_rsvp_id[i.id] }.each_with_object({}) { |i, index| index[i.id] = i }
+
+      guests_by_rsvp_id.keys.collect do |invitation_id|
+        inv = invitations_by_rsvp_id[invitation_id]
+        unless inv
+          inv = Invitation.new.tap { |i| i.id = invitation_id }
+        end
+        associate_invitation_and_guests(inv, guests_by_rsvp_id[invitation_id])
+        inv
+      end
     end
   end
 

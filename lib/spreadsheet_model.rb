@@ -33,6 +33,13 @@ module SpreadsheetModel
       rows = Rails.application.store.get_sheet(sheet_name).try(:select, &criteria) || []
       rows.map { |row| spreadsheet_mapping.update_instance_from_row(self.new, row) }
     end
+
+    ##
+    # @return [Array<SpreadsheetModel> all the instances of this type in the
+    #   system, without any associations resolved.
+    def all_raw
+      select { true }
+    end
   end
 
   def spreadsheet_mapping
