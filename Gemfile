@@ -10,6 +10,7 @@ gem 'active_model_serializers'
 
 gem 'faraday'
 gem 'faraday_middleware'
+gem 'google_drive'
 
 group :development, :test do
   gem 'rspec-rails', '~> 2.12'
