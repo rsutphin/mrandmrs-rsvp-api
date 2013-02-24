@@ -60,6 +60,28 @@ class Invitation
     @guests ||= []
   end
 
+  ##
+  # @return [String] the names of the guests combined into a single string.
+  #   (see specs for examples)
+  def combined_guest_names
+    split_names = guests.collect do |g|
+      parts = g.name.split(/ /)
+      [parts[0, parts.size - 1].join(' '), parts[-1]]
+    end
+
+    last_names = split_names.collect(&:last).uniq
+    if last_names.size == 1
+      [join_names(split_names.collect(&:first)), last_names.first].join(' ')
+    else
+      join_names(guests.collect(&:name))
+    end
+  end
+
+  def join_names(names)
+    names.join(', ').sub(/, ([^,]+)\Z/, "#{',' if names.size != 2} and \\1")
+  end
+  private :join_names
+
   def no_guest_entry_changes
     stored_guests = self.class.find(self.id).try(:guests) || []
     no_new_guests = self.guests.all? do |g|

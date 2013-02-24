@@ -326,4 +326,44 @@ describe Invitation do
       end
     end
   end
+
+  describe '#combined_guest_names' do
+    def invitation_with_guest_names(*names)
+      Invitation.new.tap do |i|
+        names.each do |name|
+          i.guests << Guest.new.tap { |g| g.name = name }
+        end
+      end
+    end
+
+    def combined_for(*names)
+      invitation_with_guest_names(*names).combined_guest_names
+    end
+
+    it 'combines the first names for a couple with the same last name' do
+      combined_for('Alice Bridges', 'Amy Bridges').should == 'Alice and Amy Bridges'
+    end
+
+    it 'combines the first names for a couple where one has a multi-part first name' do
+      combined_for('Jim Bob Bridges', 'Amy Bridges').should == 'Jim Bob and Amy Bridges'
+    end
+
+    it 'does not combine the first names for a couple with different last names' do
+      combined_for('Alice Jones', 'Amy Smith').should == 'Alice Jones and Amy Smith'
+    end
+
+    it 'does not combine the names for a plus-one' do
+      combined_for('Fred Jones', 'Guest').should == 'Fred Jones and Guest'
+    end
+
+    it 'combines the first names for a family with the same last name' do
+      combined_for('A. Benjamin', 'D. Benjamin', 'F. Benjamin').should ==
+        'A., D., and F. Benjamin'
+    end
+
+    it 'does not combine the first names for a family with one different last name' do
+      combined_for('A. Benjamin', 'D. Benjamin', 'F. Houlihan').should ==
+        'A. Benjamin, D. Benjamin, and F. Houlihan'
+    end
+  end
 end
