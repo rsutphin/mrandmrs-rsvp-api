@@ -1,4 +1,3 @@
-require 'sqlite3'
 require 'timeout'
 require 'time'
 
@@ -13,11 +12,9 @@ class GoogleDeviceOAuth
   SETUP_POLL_TIMEOUT = 180 # sec
 
   ##
-  # Performs the initial device profile setup. Creates the SQLite database that
-  # holds the tokens. Provides instructions at the console.
+  # Performs the initial device profile setup. Provides instructions at the console.
+  # Stores refresh_token in static config file.
   def initial_setup!
-    setup_token_database
-
     device_result = perform_device_request
 
     verification_url  = device_result['verification_url']
@@ -30,89 +27,35 @@ class GoogleDeviceOAuth
     puts "I'll wait here."
 
     poll_result = perform_setup_poll(device_code, interval)
-    # if polling times out, there will have already been an exception, so poll_result must not be nil at this point.
+    # If polling times out, there will have already been an exception.
+    # Therefore `poll_result` must not be nil at this point.
 
-    token_database.transaction(:exclusive) do
-      store_token_record(poll_result)
-    end
-
-    puts "Stored token."
+    update_static_refresh_token(poll_result['refresh_token'])
   end
 
   ##
-  # @return [Token] The current token.
+  # @return [Token] Requests and returns a new access token.
   def token
-    @token || reload_token
+    Token.from_json(retrieve_token_json)
   end
 
-  ##
-  # Uses the refresh token to update the access token, then saves the new one.
-  #
-  # @return [void]
-  def refresh!
-    token_database.transaction(:exclusive) do
-      Rails.logger.info "Refreshing token. Current is #{token.inspect}."
-      response = accounts_connection.post('/o/oauth2/token', {
-        'client_id' => client_id,
-        'client_secret' => client_secret,
-        'refresh_token' => token.refresh_token,
-        'grant_type' => 'refresh_token'
-      })
-      if response.body['error'] || response.status / 100 != 2
-        Rails.logger.error "Token refresh failed. Status=#{response.status}; entity=#{response.body.inspect}"
-        fail "Token refresh failed. See log for detail."
-      else
-        # The refresh token is not (always?) returned from the refresh request
-        store_token_record({ 'refresh_token' => token.refresh_token }.merge(response.body))
-        @token = nil
-      end
+  def retrieve_token_json
+    Rails.logger.info "Requesting access token using #{refresh_token}"
+    response = accounts_connection.post('/o/oauth2/token', {
+      'client_id' => client_id,
+      'client_secret' => client_secret,
+      'refresh_token' => refresh_token,
+      'grant_type' => 'refresh_token'
+    })
+    if response.body['error'] || response.status / 100 != 2
+      Rails.logger.error "Token request failed. Status=#{response.status}; entity=#{response.body.inspect}."
+      fail "Token refresh failed. See log for detail."
+    else
+      Rails.logger.debug "Access token result: #{response.body.inspect}"
+      response.body
     end
   end
-
-  def reload_token
-    token_database.transaction(:exclusive) do
-      row = token_database.get_first_row('SELECT * FROM token ORDER BY created_at DESC LIMIT 1')
-      fail "No token stored" unless row
-      return (@token = Token.load(row))
-    end
-  end
-  private :reload_token
-
-  def token_database
-    @token_database ||=
-      SQLite3::Database.new((Rails.root + 'db/google_oauth_token.sqlite3').to_s).tap do |db|
-        db.results_as_hash = true
-      end
-  end
-  private :token_database
-
-  def setup_token_database
-    token_database.execute <<-SQL
-      CREATE TABLE IF NOT EXISTS token (
-        access_token TEXT,
-        token_type TEXT,
-        expires_in INTEGER,
-        created_at TEXT,
-        refresh_token TEXT
-      );
-    SQL
-  end
-  private :setup_token_database
-
-  def store_token_record(token_json_response, from_when=Time.now)
-    insert = <<-SQL
-      INSERT INTO token (access_token, token_type, expires_in, created_at, refresh_token)
-      VALUES (?, ?, ?, ?, ?)
-    SQL
-    token_database.execute(insert,
-      token_json_response['access_token'],
-      token_json_response['token_type'],
-      token_json_response['expires_in'],
-      from_when.utc.iso8601,
-      token_json_response['refresh_token']
-    )
-  end
-  private :store_token_record
+  private :retrieve_token_json
 
   def accounts_connection
     @accounts_connection ||= Faraday::Connection.new(:url => 'https://accounts.google.com/') do |f|
@@ -161,6 +104,13 @@ class GoogleDeviceOAuth
   end
   private :perform_setup_poll
 
+  def update_static_refresh_token(new_token)
+    static_config['refresh_token'] = new_token
+    File.open(STATIC_CONFIG_FILE, 'w') do |f|
+      f.write static_config.to_yaml
+    end
+  end
+
   def static_config
     @static_config ||= YAML.load(File.read(STATIC_CONFIG_FILE))
   end
@@ -174,14 +124,17 @@ class GoogleDeviceOAuth
     static_config['client_id']
   end
 
-  class Token < Struct.new(:access_token, :token_type, :expires_in, :created_at, :refresh_token)
-    def self.load(row)
+  def refresh_token
+    static_config['refresh_token']
+  end
+
+  class Token < Struct.new(:access_token, :token_type, :expires_in, :created_at)
+    def self.from_json(json)
       new.tap do |t|
-        t.access_token = row['access_token']
-        t.token_type = row['token_type']
-        t.expires_in = row['expires_in'].to_i
-        t.created_at = Time.parse(row['created_at'])
-        t.refresh_token = row['refresh_token']
+        t.access_token = json['access_token']
+        t.token_type = json['token_type']
+        t.expires_in = json['expires_in'].to_i
+        t.created_at = Time.now.utc
       end
     end
 

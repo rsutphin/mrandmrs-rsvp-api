@@ -49,9 +49,10 @@ config/google_oauth.yml formatted like so:
 
     client_id: abcdef.apps.googleusercontent.com
     client_secret: ABC-XFT
+    refresh_token: something
 
-To do an initial setup, run
-
-    $ rake initial_device_oauth
-
-And follow its directions. This needs to be done once per deployment.
+You can use `rake initial_device_oauth` to retrieve a refresh token. (You will
+need to set client_id and client_secret to real values first.) Refresh tokens
+are limited to one per client_id/user — for this app's purposes that means that
+you'll need to share the refresh token between development, test, and
+production.
