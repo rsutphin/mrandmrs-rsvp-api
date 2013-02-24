@@ -24,6 +24,7 @@ describe CsvStore do
     let(:expected_filename) { directory + "#{sheet_name}.csv" }
 
     def write_test_sheet(*rows)
+      directory.mkpath
       expected_filename.open('w') do |f|
         rows.each do |row|
           f.puts row.join(',')
