@@ -31,66 +31,32 @@ module RsvpApi
       columns * rows
     end
 
+    def display_names(invitation)
+    end
+
     def generate
       invitations = Invitation.all
 
-      Prawn::Document.generate("insert_cards-#{Rails.env}.pdf", :page_size => PAGE_SIZE, :page_layout => :portrait, :margin => MARGIN) do |pdf|
-        pdf.font_families.update("Futura" => {
-            :normal => (Rails.root + 'fonts/Futura Medium.ttf').to_s,
-            :italic => (Rails.root + 'fonts/Futura Medium Italic.ttf').to_s
-          }
-        )
-        pdf.font_families.update("Futura Condensed" => {
-          :normal => (Rails.root + 'fonts/Futura Condensed Medium.ttf').to_s,
-          :bold   => (Rails.root + 'fonts/Futura Condensed ExtraBold.ttf').to_s
-        })
+      Prawn::Document.generate(
+        "insert_cards-#{Rails.env}.pdf",
+        :page_size => PAGE_SIZE,
+        :page_layout => :portrait,
+        :margin => MARGIN
+      ) do |pdf|
+        register_futura(pdf)
 
         pdf.font('Futura')
 
         rendered_count = 0
         invitations.each_slice(cards_per_page) do |page_of_invitations|
           1.upto(columns) do |col|
-            left = (col - 1) * card_width
             1.upto(rows) do |row|
               i = (row - 1) * columns + (col - 1)
               invitation = page_of_invitations[i]
               next unless invitation
-              names = invitation.combined_guest_names.upcase.sub(' AND ', ' and ')
-              if names.size > 35
-                names.sub!(' and ', " and\n")
-              else
-                names = "\n#{names}"
-              end
 
-              is_are = invitation.guests.size == 1 ? 'is' : 'are'
+              draw_rsvp_card(pdf, row, col, invitation)
 
-              $stderr.puts "[#{row}, #{col}] #{names}"
-
-              bottom = pdf.bounds.top_left[1] - (row - 1) * card_height
-
-              pdf.bounding_box([left, bottom], :width => card_width - 12, :height => card_height - 20) do
-                pdf.formatted_text [
-                  { :text => "#{names}\n#{is_are} invited to our wedding\n",
-                    :size => 13, :color => '444444' },
-                ], :align => :center, :valign => :top
-
-                instruction_format = { :font => 'Futura Condensed', :size => 10, :color => '888888' }
-
-                pdf.formatted_text_box [
-                  { :text => "To RSVP, please visit " }.merge(instruction_format),
-                  { :text => "http://mrandmrs.sutph.in/rsvp.html", :styles => [:underline] }.merge(instruction_format),
-                  { :text => " before April 18 and enter\n" }.merge(instruction_format),
-                  { :text => "#{invitation.id}\n", :size => 54, :color => '333333', :styles => [:italic] },
-                ], :align => :center, :at => [0, pdf.bounds.height / 2 + (60) / 2], :width => card_width
-
-                pdf.formatted_text [
-                  {
-                    :text => "If you would prefer to RSVP by phone, please call and leave a message at\n510-MAY-18KR (510-629-1857).",
-                  }.merge(instruction_format),
-                ], :valign => :bottom, :align => :center
-
-                # pdf.stroke_bounds
-              end
               rendered_count += 1
             end
           end
@@ -99,5 +65,65 @@ module RsvpApi
         end
       end
     end
+
+    def draw_rsvp_card(pdf, row, col, invitation)
+      $stderr.puts "[#{row}, #{col}] #{invitation.card_names.strip}"
+
+      left = (col - 1) * card_width
+      bottom = pdf.bounds.top_left[1] - (row - 1) * card_height
+
+      pdf.bounding_box([left, bottom], :width => card_width - 12, :height => card_height - 20) do
+        pdf.formatted_text [
+          { :text => "#{invitation.card_names}\n#{invitation.guests_is_are} invited to our wedding\n",
+            :size => 13, :color => '444444' },
+        ], :align => :center, :valign => :top
+
+        instruction_format = { :font => 'Futura Condensed', :size => 10, :color => '888888' }
+
+        pdf.formatted_text_box [
+          { :text => "To RSVP, please visit " }.merge(instruction_format),
+          { :text => "http://mrandmrs.sutph.in/rsvp.html", :styles => [:underline] }.merge(instruction_format),
+          { :text => " before April 18 and enter\n" }.merge(instruction_format),
+          { :text => "#{invitation.id}\n", :size => 54, :color => '333333', :styles => [:italic] },
+        ], :align => :center, :at => [0, pdf.bounds.height / 2 + (60) / 2], :width => card_width
+
+        pdf.formatted_text [
+          {
+            :text => "If you would prefer to RSVP by phone,\nplease call and leave a message at 510-MAY-18KR (510-629-1857).",
+          }.merge(instruction_format),
+        ], :valign => :bottom, :align => :center
+
+        # pdf.stroke_bounds
+      end
+    end
+
+    def register_futura(pdf)
+      pdf.font_families.update("Futura" => {
+          :normal => (Rails.root + 'fonts/Futura Medium.ttf').to_s,
+          :italic => (Rails.root + 'fonts/Futura Medium Italic.ttf').to_s
+        }
+      )
+      pdf.font_families.update("Futura Condensed" => {
+        :normal => (Rails.root + 'fonts/Futura Condensed Medium.ttf').to_s,
+        :bold   => (Rails.root + 'fonts/Futura Condensed ExtraBold.ttf').to_s
+      })
+    end
+
+    module InvitationExt
+      def card_names
+        names = combined_guest_names.upcase.sub(' AND ', ' and ')
+        if names.size > 35
+          names.sub(' and ', " and\n")
+        else
+          "\n#{names}"
+        end
+      end
+
+      def guests_is_are
+        guests.size == 1 ? 'is' : 'are'
+      end
+    end
+
+    Invitation.send(:include, InvitationExt)
   end
 end
