@@ -29,26 +29,26 @@ class GoogleStore
     cells = [headers] + row_hashes.collect { |row| headers.collect { |header| row[header] } }
 
     worksheet = spreadsheet.worksheets.find { |w| w.title == sheet_name }
-    if worksheet
-      worksheet.max_rows = cells.size
-      worksheet.max_cols = headers.size
-    else
+    unless worksheet
       worksheet = spreadsheet.add_worksheet(sheet_name, cells.size, headers.size)
     end
 
     worksheet.update_cells(1, 1, cells)
-    worksheet.synchronize
+    worksheet.save
   end
 
   def clear
-    spreadsheet.worksheets.first.tap do |first_worksheet|
+    worksheets = spreadsheet.worksheets
+
+    # Have to leave one sheet in place at all times.
+    worksheets.first.tap do |first_worksheet|
       f_rows = first_worksheet.num_rows
       f_cols = first_worksheet.num_cols
       first_worksheet.update_cells(1, 1, [([nil] * f_cols)] * f_rows)
       first_worksheet.save
     end
 
-    spreadsheet.worksheets[1, spreadsheet.worksheets.size].each do |later_worksheet|
+    worksheets[1, worksheets.size].each do |later_worksheet|
       later_worksheet.delete
     end
   end
@@ -63,7 +63,7 @@ class GoogleStore
   protected :spreadsheet
 
   def drive_session
-    @drive_session = GoogleDrive.login_with_oauth(
+    @drive_session ||= GoogleDrive.login_with_oauth(
       GoogleDeviceOAuth.new.token.access_token
     )
   end
