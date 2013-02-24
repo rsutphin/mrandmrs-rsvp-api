@@ -67,7 +67,7 @@ module RsvpApi
     end
 
     def instruction_format
-      @instruction_format ||= { :font => 'Futura Condensed', :size => 11, :color => '888888' }
+      @instruction_format ||= { :font => 'Futura Condensed', :size => 11, :color => '909090' }
     end
 
     def draw_rsvp_card(pdf, row, col, invitation)
@@ -75,6 +75,8 @@ module RsvpApi
 
       left = (col - 1) * card_width
       bottom = pdf.bounds.top_left[1] - (row - 1) * card_height
+
+      instruction_emphasized_color = '606060'
 
       pdf.bounding_box([left, bottom], :width => card_width - 12, :height => card_height - 20) do
         pdf.formatted_text [
@@ -84,12 +86,14 @@ module RsvpApi
 
         pdf.formatted_text_box [
           instruction_block("To RSVP, please visit ", :size => 10),
-          instruction_block("http://mrandmrs.sutph.in/rsvp.html", :styles => [:underline], :color => '606060'),
-          instruction_block(" before April 18 and enter\n", :size => 10),
+          instruction_block("http://mrandmrs.sutph.in/rsvp.html", :styles => [:underline], :color => instruction_emphasized_color),
+          instruction_block(" before ", :size => 10),
+          instruction_block("April 18", :color => instruction_emphasized_color),
+          instruction_block(" and enter\n", :size => 10),
           { :text => "#{invitation.id}\n", :size => 60, :color => '333333', :styles => [:italic] },
         ], :align => :center, :at => [0, pdf.bounds.height / 3 * 2 + 10], :width => card_width
 
-        food_highlight = { :color => '606060' }
+        food_highlight = { :color => instruction_emphasized_color }
         pdf.formatted_text_box [
           instruction_block("When you RSVP, we will ask for an entree selection for each guest.\n"),
           instruction_block("The options are "),
