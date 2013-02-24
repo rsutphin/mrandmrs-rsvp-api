@@ -67,7 +67,7 @@ module RsvpApi
     end
 
     def instruction_format
-      @instruction_format ||= { :font => 'Futura Condensed', :size => 10, :color => '888888' }
+      @instruction_format ||= { :font => 'Futura Condensed', :size => 11, :color => '888888' }
     end
 
     def draw_rsvp_card(pdf, row, col, invitation)
@@ -79,14 +79,14 @@ module RsvpApi
       pdf.bounding_box([left, bottom], :width => card_width - 12, :height => card_height - 20) do
         pdf.formatted_text [
           { :text => "#{invitation.card_names}\n#{invitation.guests_is_are} invited to our wedding\n",
-            :size => 13, :color => '444444' },
+            :size => 14, :color => '444444' },
         ], :align => :center, :valign => :top
 
         pdf.formatted_text_box [
-          instruction_block("To RSVP, please visit "),
+          instruction_block("To RSVP, please visit ", :size => 10),
           instruction_block("http://mrandmrs.sutph.in/rsvp.html", :styles => [:underline], :color => '606060'),
-          instruction_block(" before April 18 and enter\n"),
-          { :text => "#{invitation.id}\n", :size => 54, :color => '333333', :styles => [:italic] },
+          instruction_block(" before April 18 and enter\n", :size => 10),
+          { :text => "#{invitation.id}\n", :size => 60, :color => '333333', :styles => [:italic] },
         ], :align => :center, :at => [0, pdf.bounds.height / 3 * 2 + 10], :width => card_width
 
         food_highlight = { :color => '606060' }
@@ -130,7 +130,7 @@ module RsvpApi
     module InvitationExt
       def card_names
         names = combined_guest_names.upcase.sub(' AND ', ' and ')
-        if names.size > 35
+        if names.size > 33
           names.sub(' and ', " and\n")
         else
           "\n#{names}"
