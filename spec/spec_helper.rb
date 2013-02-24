@@ -37,7 +37,15 @@ RSpec.configure do |config|
   config.order = "random"
 
   def app_store
-    Rails.application.store
+    RsvpApi::StoreForRequest.store
+  end
+
+  config.before(:suite) do
+    RsvpApi::StoreForRequest.apply
+  end
+
+  config.after(:suite) do
+    RsvpApi::StoreForRequest.remove
   end
 
   config.before do

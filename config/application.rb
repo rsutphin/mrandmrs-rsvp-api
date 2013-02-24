@@ -18,9 +18,9 @@ end
 module RsvpApi
   class Application < Rails::Application
     ##
-    # @return [Object] either a GoogleSpreadsheetStore or a CsvStore as appropriate
-    #   for the environment.
-    attr_accessor :store
+    # @return [#call] a callable that produces the appropriate spreadsheet store
+    #   instance for the environment.
+    attr_accessor :store_creator
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
@@ -69,5 +69,13 @@ module RsvpApi
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
+
+    require 'rsvp_api/store_for_request'
+
+    def store
+      RsvpApi::StoreForRequest.store or fail "Store threadlocal not set"
+    end
+
+    config.middleware.use RsvpApi::StoreForRequest
   end
 end

@@ -35,6 +35,12 @@ ActionController::Base.allow_rescue = false
 Cucumber::Rails::Database.javascript_strategy = :truncation
 
 Before do
+  RsvpApi::StoreForRequest.apply
+
   # Clean out store before each test
   Rails.application.store.clear
+end
+
+After do
+  RsvpApi::StoreForRequest.remove
 end

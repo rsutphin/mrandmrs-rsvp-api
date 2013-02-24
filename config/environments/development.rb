@@ -30,4 +30,10 @@ RsvpApi::Application.configure do
   config.assets.debug = true
 end
 
-Rails.application.store = CsvStore.new(Rails.root + 'tmp' + 'development_csv_store')
+Rails.application.store_creator = lambda {
+  if ENV['GOOGLE_STORE']
+    GoogleStore.new('Wedding RSVP Spreadsheet (development)')
+  else
+    CsvStore.new(Rails.root + 'tmp' + 'development_csv_store')
+  end
+}

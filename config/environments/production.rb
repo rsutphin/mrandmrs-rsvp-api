@@ -62,3 +62,5 @@ RsvpApi::Application.configure do
   config.active_support.deprecation = :notify
 
 end
+
+Rails.application.store_creator = lambda { GoogleStore.new('Wedding RSVP Spreadsheet (production)') }

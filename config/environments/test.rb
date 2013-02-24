@@ -34,4 +34,4 @@ RsvpApi::Application.configure do
   config.active_support.deprecation = :stderr
 end
 
-Rails.application.store = CsvStore.new(Rails.root + 'tmp' + 'test_csv_store')
+Rails.application.store_creator = lambda { CsvStore.new(Rails.root + 'tmp' + 'test_csv_store') }
