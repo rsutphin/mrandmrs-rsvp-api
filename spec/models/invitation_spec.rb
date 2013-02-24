@@ -5,7 +5,7 @@ describe Invitation do
   describe 'as DAO' do
     describe '.find' do
       it 'finds an Invitation instance by ID' do
-        store.replace_sheet(Guest.sheet_name, [
+        app_store.replace_sheet(Guest.sheet_name, [
           { 'RSVP ID' => 'KR001', 'Guest Name' => 'F' },
           { 'RSVP ID' => 'KR002', 'Guest Name' => 'G' },
           { 'RSVP ID' => 'KR002', 'Guest Name' => 'H' }
@@ -15,7 +15,7 @@ describe Invitation do
       end
 
       it 'gives nil for a non-existent instance' do
-        store.replace_sheet(Guest.sheet_name, [
+        app_store.replace_sheet(Guest.sheet_name, [
           { 'RSVP ID' => 'KR002', 'Guest Name' => 'B' }
         ])
 
@@ -23,7 +23,7 @@ describe Invitation do
       end
 
       it 'finds the invitation if there is only guest info' do
-        store.replace_sheet(Guest.sheet_name, [
+        app_store.replace_sheet(Guest.sheet_name, [
           { 'RSVP ID' => 'KR002', 'Guest Name' => 'B' }
         ])
 
@@ -31,7 +31,7 @@ describe Invitation do
       end
 
       it 'does not find the invitation if there is only notes info' do
-        store.replace_sheet(Invitation.sheet_name, [
+        app_store.replace_sheet(Invitation.sheet_name, [
           { 'RSVP ID' => 'KR002', 'Hotel' => 'A thing' }
         ])
 
@@ -43,14 +43,14 @@ describe Invitation do
         let(:blank_invitation) { Invitation.find('KR123') }
 
         before do
-          store.replace_sheet(Guest.sheet_name, [
+          app_store.replace_sheet(Guest.sheet_name, [
             { 'RSVP ID' => 'KR345', 'Guest Name' => 'AP', 'E-mail Address' => 'ap@example.com', 'Attending?' => 'y', 'Entree Choice' => 'Crab' },
             { 'RSVP ID' => 'KR345', 'Guest Name' => 'SP', 'E-mail Address' => 'sp@example.com', 'Attending?' => nil },
             { 'RSVP ID' => 'KR345', 'Guest Name' => 'RP', 'E-mail Address' => '', 'Attending?' => 'n', 'Entree Choice' => '' },
             { 'RSVP ID' => 'KR123', 'Guest Name' => 'ES', 'E-mail Address' => '', 'Attending?' => '', 'Entree Choice' => '' }
           ])
 
-          store.replace_sheet(Invitation.sheet_name, [
+          app_store.replace_sheet(Invitation.sheet_name, [
             { 'RSVP ID' => 'KR345', 'Comments' => "Eat at Joe's", 'Hotel' => 'The fancy one by the river' },
             { 'RSVP ID' => 'KR123', 'Comments' => '', 'Hotel' => '' }
           ])
@@ -117,7 +117,7 @@ describe Invitation do
 
       describe 'when there is a guest with the ID' do
         before do
-          store.replace_sheet(Guest.sheet_name, [
+          app_store.replace_sheet(Guest.sheet_name, [
             { 'RSVP ID' => invitation_id, 'Guest Name' => 'E T C', 'E-mail Address' => 'e@tc' }
           ])
         end
@@ -129,7 +129,7 @@ describe Invitation do
 
       describe 'when there is no guest with that ID' do
         before do
-          store.replace_sheet(Guest.sheet_name, [
+          app_store.replace_sheet(Guest.sheet_name, [
             { 'RSVP ID' => 'KR009', 'Guest Name' => 'E T C', 'E-mail Address' => 'e@tc' }
           ])
         end
@@ -139,7 +139,7 @@ describe Invitation do
         end
 
         it 'is false even if there is an invitation row with that ID' do
-          store.replace_sheet(Invitation.sheet_name, [
+          app_store.replace_sheet(Invitation.sheet_name, [
             { 'RSVP ID' => invitation_id  }
           ])
 
@@ -160,7 +160,7 @@ describe Invitation do
       }
 
       before do
-        store.replace_sheet(Guest.sheet_name, [
+        app_store.replace_sheet(Guest.sheet_name, [
           { 'RSVP ID' => invitation_id, 'Guest Name' => 'E T C', 'E-mail Address' => 'e@tc' }
         ])
       end
@@ -184,7 +184,7 @@ describe Invitation do
 
         describe 'when there is an existing row' do
           before do
-            store.replace_sheet(Invitation.sheet_name, [
+            app_store.replace_sheet(Invitation.sheet_name, [
               { 'RSVP ID' => invitation_id, 'Comments' => 'Etc', 'Hotel' => 'Etc' }
             ])
           end
@@ -194,7 +194,7 @@ describe Invitation do
 
         describe 'when there is no existing row' do
           before do
-            store.replace_sheet(Invitation.sheet_name, [
+            app_store.replace_sheet(Invitation.sheet_name, [
               { 'RSVP ID' => 'KR111' }
             ])
           end
@@ -274,12 +274,12 @@ describe Invitation do
 
     describe 'of guests' do
       before do
-        store.replace_sheet(Guest.sheet_name, [
+        app_store.replace_sheet(Guest.sheet_name, [
           { 'RSVP ID' => invitation.id, 'Guest Name' => 'Alpha' },
           { 'RSVP ID' => invitation.id, 'Guest Name' => 'Beta' }
         ])
 
-        store.replace_sheet(Invitation.sheet_name, [
+        app_store.replace_sheet(Invitation.sheet_name, [
           { 'RSVP ID' => invitation.id }
         ])
       end

@@ -71,7 +71,7 @@ describe Guest do
     }
 
     before do
-      store.replace_sheet(Guest.sheet_name, [
+      app_store.replace_sheet(Guest.sheet_name, [
         { 'RSVP ID' => guest.invitation_id, 'Guest Name' => guest.name },
       ])
 
@@ -181,20 +181,20 @@ describe Guest do
 
     describe 'updating an existing record' do
       before do
-        store.replace_sheet(Guest.sheet_name, [
+        app_store.replace_sheet(Guest.sheet_name, [
           { 'RSVP ID' => invitation_id, 'Guest Name' => 'Fred Johansson', 'E-mail Address' => 'fred@example.net' },
           { 'RSVP ID' => invitation_id, 'Guest Name' => 'Carol Emil', 'E-mail Address' => 'cemil@example.net' }
         ])
       end
 
       let(:result_row) {
-        store.get_sheet(Guest.sheet_name).detect { |row| row['Guest Name'] == guest.name }
+        app_store.get_sheet(Guest.sheet_name).detect { |row| row['Guest Name'] == guest.name }
       }
 
       it 'updates the identified record only' do
         guest.save
 
-        store.get_sheet(Guest.sheet_name).collect { |row| row['Guest Name'] }.sort.should == [
+        app_store.get_sheet(Guest.sheet_name).collect { |row| row['Guest Name'] }.sort.should == [
           'Carol Emil', 'Fred Johansson'
         ]
       end

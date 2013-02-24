@@ -36,11 +36,11 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = "random"
 
-  def store
+  def app_store
     Rails.application.store
   end
 
   config.before do
-    store.clear
+    app_store.clear
   end
 end
