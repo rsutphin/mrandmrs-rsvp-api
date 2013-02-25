@@ -9,7 +9,7 @@ class GoogleStore
   end
 
   def get_sheet(sheet_name)
-    worksheet = spreadsheet.worksheets.find { |w| w.title == sheet_name }
+    worksheet = worksheet(sheet_name)
     return nil unless worksheet
 
     rows = worksheet.rows
@@ -28,9 +28,10 @@ class GoogleStore
     headers = headers_for_hashes(row_hashes)
     cells = [headers] + row_hashes.collect { |row| headers.collect { |header| row[header] } }
 
-    worksheet = spreadsheet.worksheets.find { |w| w.title == sheet_name }
+    worksheet = worksheet(sheet_name)
     unless worksheet
       worksheet = spreadsheet.add_worksheet(sheet_name, cells.size, headers.size)
+      invalidate_worksheets
     end
 
     0.upto(cells.size - 1) do |r0|
@@ -48,8 +49,6 @@ class GoogleStore
   end
 
   def clear
-    worksheets = spreadsheet.worksheets
-
     # Have to leave one sheet in place at all times.
     worksheets.first.tap do |first_worksheet|
       f_rows = first_worksheet.num_rows
@@ -61,7 +60,23 @@ class GoogleStore
     worksheets[1, worksheets.size].each do |later_worksheet|
       later_worksheet.delete
     end
+    invalidate_worksheets
   end
+
+  def worksheet(name)
+    worksheets.find { |w| w.title == name }
+  end
+  protected :worksheet
+
+  def worksheets
+    @worksheets ||= spreadsheet.worksheets
+  end
+  protected :worksheets
+
+  def invalidate_worksheets
+    @worksheets = nil
+  end
+  protected :invalidate_worksheets
 
   def spreadsheet
     @spreadsheet ||= drive_session.spreadsheet_by_title(doc_title).tap do |s|

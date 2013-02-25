@@ -74,6 +74,10 @@ describe GoogleStore do
         worksheet.should_not be_nil
       end
 
+      it 'is visible to #get_sheet after is it created' do
+        store.get_sheet(sheet_name).should_not be_nil
+      end
+
       include_context 'a sheet replacer'
     end
 
