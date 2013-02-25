@@ -62,7 +62,7 @@ class InvitationsController < ApplicationController
   end
 
   def verify_invitation_matches_url(invitation)
-    if invitation.id != params['id']
+    if invitation.id.upcase != params['id'].upcase
       response.status = 422
       render :json => high_level_errors_entity(
         "Updates for invitation #{invitation.id} must be sent to its resource, #{invitation_path(invitation.id)}.")

@@ -63,7 +63,7 @@ class Guest
 
   class << self
     def find_for_rsvp(rsvp_id)
-      select { |row| row['RSVP ID'] == rsvp_id }
+      select { |row| row['RSVP ID'].downcase == rsvp_id.downcase }
     end
   end
 

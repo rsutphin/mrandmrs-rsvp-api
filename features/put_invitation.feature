@@ -246,6 +246,42 @@ Scenario: Providing an invalid attribute value
     }
     """
 
+Scenario: An invitation requested with a different case
+  When I PUT the following JSON to invitations/kR021
+    """
+    {
+      "invitation": {
+        "id": "KR021",
+        "guests": [
+          "johnfredricksson",
+          "emilycarolina"
+        ],
+        "response_comments": "Neat-o",
+        "hotel": "Crowne Plaza"
+      },
+
+      "guests": [
+        {
+          "id": "emilycarolina",
+          "name": "Emily Carolina",
+          "email_address": "ec@example.com",
+          "attending": true,
+          "entree_choice": "Cheddar-pickle sandwich"
+        },
+        {
+          "id": "johnfredricksson",
+          "attending": false,
+          "name": "John Fredricksson",
+          "email_address": "jf@example.net"
+        }
+      ]
+    }
+    """
+  Then the response status is 200
+   And the JSON response is
+    """
+    { "ok": true }
+    """
 
 Scenario: An unknown invitation
   When I PUT the following JSON to invitations/KR022

@@ -110,6 +110,25 @@ describe Invitation do
           end
         end
       end
+
+      describe 'when found with a different case' do
+        before do
+          app_store.replace_sheet(Guest.sheet_name, [
+            { 'RSVP ID' => 'Kr002', 'Guest Name' => 'B' },
+            { 'RSVP ID' => 'Kr001', 'Guest Name' => 'A' }
+          ])
+        end
+
+        let(:with_different_case) { Invitation.find('kR002') }
+
+        it 'finds the invitation' do
+          with_different_case.should_not be_nil
+        end
+
+        it 'returns the persisted ID' do
+          with_different_case.id.should == 'Kr002'
+        end
+      end
     end
 
     describe '.all' do
@@ -192,6 +211,7 @@ describe Invitation do
 
     describe '#save' do
       let(:invitation_id) { 'KR900' }
+      let(:stored_invitation_id) { invitation_id }
 
       let(:invitation) {
         Invitation.new.tap do |i|
@@ -203,7 +223,7 @@ describe Invitation do
 
       before do
         app_store.replace_sheet(Guest.sheet_name, [
-          { 'RSVP ID' => invitation_id, 'Guest Name' => 'E T C', 'E-mail Address' => 'e@tc' }
+          { 'RSVP ID' => stored_invitation_id, 'Guest Name' => 'E T C', 'E-mail Address' => 'e@tc' }
         ])
       end
 
@@ -227,7 +247,7 @@ describe Invitation do
         describe 'when there is an existing row' do
           before do
             app_store.replace_sheet(Invitation.sheet_name, [
-              { 'RSVP ID' => invitation_id, 'Comments' => 'Etc', 'Hotel' => 'Etc' }
+              { 'RSVP ID' => stored_invitation_id, 'Comments' => 'Etc', 'Hotel' => 'Etc' }
             ])
           end
 
@@ -246,6 +266,19 @@ describe Invitation do
 
         describe 'when the sheet does not exist' do
           include_context 'updating invitation attributes'
+        end
+      end
+
+      describe 'when the invitation being saved has a different case' do
+        let(:invitation_id) { 'kr900' }
+        let(:stored_invitation_id) { invitation_id.upcase }
+
+        before do
+          invitation.save
+        end
+
+        it 'preserves the stored ID in the inviration table' do
+          app_store.get_sheet(Invitation.sheet_name).first['RSVP ID'].should == stored_invitation_id
         end
       end
 

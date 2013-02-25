@@ -130,3 +130,33 @@ Scenario: An unknown invitation
       ]
     }
     """
+
+Scenario: An invitation requested with a different case
+  Given the guest spreadsheet
+    | RSVP ID | Guest Name        | E-mail Address  |
+    | KR018   | John Fredricksson | jf@example.net  |
+    | KR021   | Emily Carolina    | ec@example.com  |
+  When I GET invitations/kr018
+  Then the JSON response is
+    """
+    {
+      "invitation": {
+        "id": "KR018",
+        "guests": [
+          "johnfredricksson"
+        ],
+        "response_comments": null,
+        "hotel": null
+      },
+
+      "guests": [
+        {
+          "id": "johnfredricksson",
+          "name": "John Fredricksson",
+          "email_address": "jf@example.net",
+          "attending": null,
+          "entree_choice": null
+        }
+      ]
+    }
+    """

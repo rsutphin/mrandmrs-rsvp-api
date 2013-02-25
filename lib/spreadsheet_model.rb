@@ -86,7 +86,9 @@ module SpreadsheetModel
 
     def update_row_from_instance(row, instance)
       @value_mappings.each do |map|
-        row[map[:column]] = map[:to_column].call(instance.send(map[:attribute]))
+        unless map[:identifier]
+          row[map[:column]] = map[:to_column].call(instance.send(map[:attribute]))
+        end
       end
       row
     end

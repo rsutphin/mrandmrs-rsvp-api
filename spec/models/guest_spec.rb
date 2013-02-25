@@ -171,6 +171,7 @@ describe Guest do
 
   describe '#save' do
     let(:invitation_id) { 'GR003' }
+    let(:stored_invitation_id) { invitation_id }
 
     let(:guest) {
       Guest.new.tap do |g|
@@ -182,8 +183,8 @@ describe Guest do
     describe 'updating an existing record' do
       before do
         app_store.replace_sheet(Guest.sheet_name, [
-          { 'RSVP ID' => invitation_id, 'Guest Name' => 'Fred Johansson', 'E-mail Address' => 'fred@example.net' },
-          { 'RSVP ID' => invitation_id, 'Guest Name' => 'Carol Emil', 'E-mail Address' => 'cemil@example.net' }
+          { 'RSVP ID' => stored_invitation_id, 'Guest Name' => 'Fred Johansson', 'E-mail Address' => 'fred@example.net' },
+          { 'RSVP ID' => stored_invitation_id, 'Guest Name' => 'Carol Emil', 'E-mail Address' => 'cemil@example.net' }
         ])
       end
 
@@ -197,6 +198,17 @@ describe Guest do
         app_store.get_sheet(Guest.sheet_name).collect { |row| row['Guest Name'] }.sort.should == [
           'Carol Emil', 'Fred Johansson'
         ]
+      end
+
+      describe 'when the input ID has a different case from the stored ID' do
+        let(:invitation_id) { 'gr003' }
+        let(:stored_invitation_id) { invitation_id.upcase }
+
+        it 'preserves the stored case' do
+          guest.save
+
+          app_store.get_sheet(Guest.sheet_name).collect { |row| row['RSVP ID'] }.uniq.should == ['GR003']
+        end
       end
 
       describe '#attending' do

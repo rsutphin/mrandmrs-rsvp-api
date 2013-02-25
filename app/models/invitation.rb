@@ -42,8 +42,8 @@ class Invitation
         return nil
       end
 
-      potential_invitation = select { |row| row['RSVP ID'] == id }.first
-      invitation = potential_invitation || Invitation.new.tap { |i| i.id = id }
+      potential_invitation = select { |row| row['RSVP ID'].downcase == id.downcase }.first
+      invitation = potential_invitation || Invitation.new.tap { |i| i.id = guests.first.invitation_id }
 
       associate_invitation_and_guests(invitation, guests)
 
@@ -116,9 +116,10 @@ class Invitation
 
   def save
     invitation_sheet = Rails.application.store.get_sheet(sheet_name) || []
-    invitation_row = invitation_sheet.detect { |row| row['RSVP ID'] == self.id }
+    invitation_row = invitation_sheet.detect { |row| row['RSVP ID'].downcase == self.id.downcase }
     unless invitation_row
-      invitation_row = { 'RSVP ID' => self.id }
+      # upcase here is a bit of a hack, but I don't know how other to canonicalize to persisted quickly
+      invitation_row = { 'RSVP ID' => self.id.upcase }
       invitation_sheet << invitation_row
     end
 
