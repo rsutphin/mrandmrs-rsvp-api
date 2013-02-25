@@ -33,7 +33,17 @@ class GoogleStore
       worksheet = spreadsheet.add_worksheet(sheet_name, cells.size, headers.size)
     end
 
-    worksheet.update_cells(1, 1, cells)
+    0.upto(cells.size - 1) do |r0|
+      0.upto(cells.first.size - 1) do |c0|
+        new_value = cells[r0][c0]
+        r1 = r0 + 1
+        c1 = c0 + 1
+
+        if worksheet[r1, c1] != new_value
+          worksheet[r1, c1] = new_value
+        end
+      end
+    end
     worksheet.save
   end
 
