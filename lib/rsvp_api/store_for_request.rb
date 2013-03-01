@@ -18,7 +18,9 @@ module RsvpApi
 
     class << self
       def apply
-        self.store = Rails.application.store_creator.call
+        self.store = Rails.application.store_creator.call.tap do |store|
+          Rails.logger.debug("Using #{store.name}")
+        end
       end
 
       def remove

@@ -13,6 +13,10 @@ class CsvStore
       end
   end
 
+  def name
+    "#{self.class}(#{directory})"
+  end
+
   ##
   # Empties all data from the store.
   #

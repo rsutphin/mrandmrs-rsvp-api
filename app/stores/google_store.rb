@@ -8,6 +8,10 @@ class GoogleStore
     @doc_title = doc_title
   end
 
+  def name
+    "#{self.class}(#{doc_title})"
+  end
+
   def get_sheet(sheet_name)
     worksheet = worksheet(sheet_name)
     return nil unless worksheet
