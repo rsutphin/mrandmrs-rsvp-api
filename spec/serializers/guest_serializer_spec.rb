@@ -8,7 +8,9 @@ describe GuestSerializer do
         'name' => 'Emily Carolina',
         'email_address' => 'ec@example.com',
         'entree_choice' => 'Fish',
-        'attending' => true
+        'attending' => true,
+        'invited_to_rehearsal_dinner' => true,
+        'attending_rehearsal_dinner' => true
       }
     }
 
@@ -20,7 +22,7 @@ describe GuestSerializer do
       result.should be_a Guest
     end
 
-    %w(email_address entree_choice attending name).each do |a|
+    %w(email_address entree_choice attending name attending_rehearsal_dinner).each do |a|
       it "copies over #{a}" do
         result.send(a).should == input[a]
       end

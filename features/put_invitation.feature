@@ -5,10 +5,9 @@ Feature: PUT an invitation
 
 Background:
   Given the guest spreadsheet
-    | RSVP ID | Guest Name        | E-mail Address |
-    | KR021   | John Fredricksson | jf@example.net |
-    | KR021   | Emily Carolina    | ec@example.com |
-
+    | RSVP ID | Guest Name        | E-mail Address | Invited to Rehearsal Dinner? |
+    | KR021   | John Fredricksson | jf@example.net | Yes                          |
+    | KR021   | Emily Carolina    | ec@example.com |                              |
 
 Scenario: A valid invitation
   When I PUT the following JSON to invitations/KR021
@@ -36,7 +35,9 @@ Scenario: A valid invitation
           "id": "johnfredricksson",
           "attending": false,
           "name": "John Fredricksson",
-          "email_address": "jf@example.net"
+          "email_address": "jf@example.net",
+          "invited_to_rehearsal_dinner": true,
+          "attending_rehearsal_dinner": true
         }
       ]
     }
@@ -66,14 +67,18 @@ Scenario: A valid invitation
           "name": "John Fredricksson",
           "email_address": "jf@example.net",
           "attending": false,
-          "entree_choice": null
+          "entree_choice": null,
+          "invited_to_rehearsal_dinner": true,
+          "attending_rehearsal_dinner": true
         },
         {
           "id": "emilycarolina",
           "name": "Emily Carolina",
           "email_address": "ec@example.com",
           "attending": true,
-          "entree_choice": "Cheddar-pickle sandwich"
+          "entree_choice": "Cheddar-pickle sandwich",
+          "invited_to_rehearsal_dinner": false,
+          "attending_rehearsal_dinner": null
         }
       ]
     }
@@ -97,7 +102,9 @@ Scenario: Attempting to remove a guest
           "id": "emilycarolina",
           "attending": false,
           "name": "Emily Carolina",
-          "email_address": "ec@example.com"
+          "email_address": "ec@example.com",
+          "invited_to_rehearsal_dinner": false,
+          "attending_rehearsal_dinner": null
         }
       ]
     }
@@ -185,14 +192,18 @@ Scenario: Attempting to add a guest
           "name": "John Fredricksson",
           "email_address": "jf@example.net",
           "attending": null,
-          "entree_choice": null
+          "entree_choice": null,
+          "invited_to_rehearsal_dinner": true,
+          "attending_rehearsal_dinner": null
         },
         {
           "id": "emilycarolina",
           "name": "Emily Carolina",
           "email_address": "ec@example.com",
           "attending": null,
-          "entree_choice": null
+          "entree_choice": null,
+          "invited_to_rehearsal_dinner": false,
+          "attending_rehearsal_dinner": null
         }
       ]
     }
@@ -224,7 +235,8 @@ Scenario: Providing an invalid attribute value
           "id": "johnfredricksson",
           "attending": false,
           "name": "John Fredricksson",
-          "email_address": "jf@example.net"
+          "email_address": "jf@example.net",
+          "invited_to_rehearsal_dinner": true
         }
       ]
     }
@@ -272,7 +284,8 @@ Scenario: An invitation requested with a different case
           "id": "johnfredricksson",
           "attending": false,
           "name": "John Fredricksson",
-          "email_address": "jf@example.net"
+          "email_address": "jf@example.net",
+          "invited_to_rehearsal_dinner": true
         }
       ]
     }

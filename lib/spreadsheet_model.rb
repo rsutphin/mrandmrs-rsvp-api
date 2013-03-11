@@ -103,6 +103,7 @@ module SpreadsheetModel
     def value_mapping(column_name, attribute_name, options={})
       @value_mappings << expand_mapping({
         :column => column_name, :attribute => attribute_name,
+        :read_only => false,
         :from_column => :nil_for_blank, :to_column => :identity
       }.merge(options))
     end
@@ -117,7 +118,7 @@ module SpreadsheetModel
 
     def update_row_from_instance(row, instance)
       @value_mappings.each do |map|
-        unless map[:identifier]
+        unless map[:identifier] || map[:read_only]
           row[map[:column]] = map[:to_column].call(instance.send(map[:attribute]))
         end
       end

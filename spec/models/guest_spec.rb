@@ -72,7 +72,7 @@ describe Guest do
 
     before do
       app_store.replace_sheet(Guest.sheet_name, [
-        { 'RSVP ID' => guest.invitation_id, 'Guest Name' => guest.name },
+        { 'RSVP ID' => guest.invitation_id, 'Guest Name' => guest.name, 'Invited to Rehearsal Dinner?' => '' },
       ])
 
       # base object should be valid
@@ -171,15 +171,61 @@ describe Guest do
       end
     end
 
+    describe 'of #invited_to_rehearsal_dinner' do
+      def it_has_the_appropriate_validation_message
+        guest.errors[:invited_to_rehearsal_dinner].should == [
+          "may not be changed"
+        ]
+      end
+
+      describe 'when the persisted value is false' do
+        it 'is valid when false' do
+          guest.invited_to_rehearsal_dinner = false
+          guest.should be_valid
+        end
+
+        it 'is not valid when true' do
+          guest.invited_to_rehearsal_dinner = true
+          guest.should_not be_valid
+
+          it_has_the_appropriate_validation_message
+        end
+      end
+
+      describe 'when the persisted value is true' do
+        before do
+          app_store.replace_sheet(Guest.sheet_name, [
+            { 'RSVP ID' => guest.invitation_id, 'Guest Name' => guest.name, 'Invited to Rehearsal Dinner?' => 'YES' },
+          ])
+        end
+
+        it 'is not valid when false' do
+          guest.invited_to_rehearsal_dinner = false
+          guest.should_not be_valid
+
+          it_has_the_appropriate_validation_message
+        end
+
+        it 'is valid when true' do
+          guest.invited_to_rehearsal_dinner = true
+          guest.should be_valid
+        end
+      end
+    end
+
     describe 'of #attending_rehearsal_dinner' do
       describe 'when #invited_to_rehearsal_dinner is true' do
         before do
+          app_store.replace_sheet(Guest.sheet_name, [
+            { 'RSVP ID' => guest.invitation_id, 'Guest Name' => guest.name, 'Invited to Rehearsal Dinner?' => 'y' },
+          ])
           guest.invited_to_rehearsal_dinner = true
         end
 
         [true, false, nil].each do |valid_value|
           it "is valid when attending_rehearsal_dinner=#{valid_value.inspect}" do
             guest.attending_rehearsal_dinner = valid_value
+            puts guest.errors.full_messages unless guest.valid?
             guest.should be_valid
           end
         end

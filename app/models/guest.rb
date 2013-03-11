@@ -36,17 +36,16 @@ class Guest
 
   validates_inclusion_of :attending, :in => [true, false, nil],
     :message => "invalid value for attending"
-  validates_inclusion_of :invited_to_rehearsal_dinner, :in => [true, false],
-    :message => "invalid value for invited_to_rehearsal_dinner"
   validates_presence_of :entree_choice, :if => lambda { |rec| rec.attending },
     :message => 'must be selected when attending'
   validates_length_of :name, :email_address, :entree_choice, :maximum => 1024
 
-  validate :no_name_changes, :rehearsal_dinner_only_when_invited
+  validate :no_name_changes,
+    :no_rehearsal_dinner_invite_changes, :rehearsal_dinner_only_when_invited
 
   spreadsheet_mapping 'Invitations' do |m|
-    m.value_mapping('RSVP ID', :invitation_id, :identifier => true)
-    m.value_mapping('Guest Name', :name)
+    m.value_mapping('RSVP ID', :invitation_id, identifier: true)
+    m.value_mapping('Guest Name', :name, read_only: true)
     m.value_mapping('E-mail Address', :email_address)
     m.value_mapping('Entree Choice', :entree_choice)
     m.value_mapping('Attending?', :attending,
@@ -54,6 +53,7 @@ class Guest
       from_column: :boolean_or_nil
     )
     m.value_mapping('Invited to Rehearsal Dinner?', :invited_to_rehearsal_dinner,
+      read_only: true,
       to_column: :yes_nil,
       from_column: :boolean
     )
@@ -92,10 +92,22 @@ class Guest
     end
   end
 
+  def invited_to_rehearsal_dinner=(val)
+    @invited_to_rehearsal_dinner = (val ? true : false)
+  end
+
   def no_name_changes
-    stored_names = self.class.find_for_rsvp(self.invitation_id).collect(&:name)
+    stored_names = stored_guests_for_validation.collect(&:name)
     unless stored_names.include?(self.name)
       errors.add(:name, "may not be changed")
+    end
+  end
+
+  def no_rehearsal_dinner_invite_changes
+    stored_guest = stored_guests_for_validation.detect { |g| g.id == self.id }
+    return unless stored_guest # other validations will handle this
+    if stored_guest.invited_to_rehearsal_dinner ^ self.invited_to_rehearsal_dinner
+      errors.add(:invited_to_rehearsal_dinner, "may not be changed")
     end
   end
 
@@ -108,6 +120,11 @@ class Guest
       errors.add(:attending_rehearsal_dinner, "invalid value for attending_rehearsal_dinner")
     end
   end
+
+  def stored_guests_for_validation
+    self.class.find_for_rsvp(self.invitation_id)
+  end
+  private :stored_guests_for_validation
 
   def save
     guests_sheet = Rails.application.store.get_sheet(sheet_name) || []

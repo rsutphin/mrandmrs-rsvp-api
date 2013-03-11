@@ -27,7 +27,9 @@ Scenario: A new single-person invitation
           "name": "John Fredricksson",
           "email_address": "jf@example.net",
           "attending": null,
-          "entree_choice": null
+          "entree_choice": null,
+          "invited_to_rehearsal_dinner": false,
+          "attending_rehearsal_dinner": null
         }
       ]
     }
@@ -62,21 +64,27 @@ Scenario: A new multiple-person invitation
           "name": "Giraffe Sutphin",
           "email_address": "jgs@example.net",
           "attending": null,
-          "entree_choice": null
+          "entree_choice": null,
+          "invited_to_rehearsal_dinner": false,
+          "attending_rehearsal_dinner": null
         },
         {
           "id": "jaguarsutphin",
           "name": "Jaguar Sutphin",
           "email_address": null,
           "attending": null,
-          "entree_choice": null
+          "entree_choice": null,
+          "invited_to_rehearsal_dinner": false,
+          "attending_rehearsal_dinner": null
         },
         {
           "id": "elephantsutphin",
           "name": "Elephant Sutphin",
           "email_address": null,
           "attending": null,
-          "entree_choice": null
+          "entree_choice": null,
+          "invited_to_rehearsal_dinner": false,
+          "attending_rehearsal_dinner": null
         }
       ]
     }
@@ -109,7 +117,9 @@ Scenario: An invitation which has previously been responded to
           "name": "Emily Carolina",
           "email_address": "ec@example.com",
           "attending": true,
-          "entree_choice": "Veg. Lasagna"
+          "entree_choice": "Veg. Lasagna",
+          "invited_to_rehearsal_dinner": false,
+          "attending_rehearsal_dinner": null
         }
       ]
     }
@@ -155,7 +165,9 @@ Scenario: An invitation requested with a different case
           "name": "John Fredricksson",
           "email_address": "jf@example.net",
           "attending": null,
-          "entree_choice": null
+          "entree_choice": null,
+          "invited_to_rehearsal_dinner": false,
+          "attending_rehearsal_dinner": null
         }
       ]
     }
