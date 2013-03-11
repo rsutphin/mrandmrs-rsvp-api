@@ -51,11 +51,42 @@ module SpreadsheetModel
   end
 
   class Mapping
-    DEFAULT_FROM_COLUMN = lambda { |column_value|
-      column_value.blank? ? nil : column_value
+    NAMED_CONVERSIONS = {
+      from_column: {
+        nil_for_blank: lambda { |column_value|
+          column_value.blank? ? nil : column_value
+        },
+        boolean_or_nil: lambda { |v|
+          case v
+          when /y/i
+            true
+          when /n/i
+            false
+          else
+            nil
+          end
+        },
+        boolean: lambda { |v|
+          v =~ /y/i ? true : false
+        }
+      },
+      to_column: {
+        identity: lambda { |attribute_value| attribute_value },
+        yes_no_nil: lambda { |v|
+          case v
+          when nil
+            nil
+          when true
+            'Yes'
+          when false
+            'No'
+          end
+        },
+        yes_nil: lambda { |v|
+          v ? 'Yes' : nil
+        }
+      }
     }
-
-    DEFAULT_TO_COLUMN = lambda { |attribute_value| attribute_value }
 
     attr_reader :sheet_name
 
@@ -70,10 +101,10 @@ module SpreadsheetModel
     # * :from_column => a lambda which receives a column value and returns an attribute value
     # * :to_column => a lambda which receives an attribute value and returns a column value
     def value_mapping(column_name, attribute_name, options={})
-      @value_mappings << {
+      @value_mappings << expand_mapping({
         :column => column_name, :attribute => attribute_name,
-        :from_column => DEFAULT_FROM_COLUMN, :to_column => DEFAULT_TO_COLUMN
-      }.merge(options)
+        :from_column => :nil_for_blank, :to_column => :identity
+      }.merge(options))
     end
 
     def columns
@@ -101,5 +132,24 @@ module SpreadsheetModel
       end
       instance
     end
+
+    def expand_mapping(options)
+      [:from_column, :to_column].each do |conversion_kind|
+        options[conversion_kind] =
+          extract_conversion(conversion_kind, options[conversion_kind])
+      end
+      options
+    end
+    private :expand_mapping
+
+    def extract_conversion(kind, value)
+      case value
+      when Symbol
+        NAMED_CONVERSIONS[kind][value] or fail "Unknown #{kind.inspect} conversion #{value.inspect}"
+      else
+        value
+      end
+    end
+    private :extract_conversion
   end
 end

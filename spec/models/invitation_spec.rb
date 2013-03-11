@@ -44,9 +44,18 @@ describe Invitation do
 
         before do
           app_store.replace_sheet(Guest.sheet_name, [
-            { 'RSVP ID' => 'KR345', 'Guest Name' => 'AP', 'E-mail Address' => 'ap@example.com', 'Attending?' => 'y', 'Entree Choice' => 'Crab' },
-            { 'RSVP ID' => 'KR345', 'Guest Name' => 'SP', 'E-mail Address' => 'sp@example.com', 'Attending?' => nil },
-            { 'RSVP ID' => 'KR345', 'Guest Name' => 'RP', 'E-mail Address' => '', 'Attending?' => 'n', 'Entree Choice' => '' },
+            {
+              'RSVP ID' => 'KR345', 'Guest Name' => 'AP', 'E-mail Address' => 'ap@example.com', 'Attending?' => 'y', 'Entree Choice' => 'Crab',
+              'Invited to Rehearsal Dinner?' => '', 'Attending Rehearsal Dinner?' => 'n'
+            },
+            {
+              'RSVP ID' => 'KR345', 'Guest Name' => 'SP', 'E-mail Address' => 'sp@example.com', 'Attending?' => nil,
+              'Invited to Rehearsal Dinner?' => 'y', 'Attending Rehearsal Dinner?' => 'Y'
+            },
+            {
+              'RSVP ID' => 'KR345', 'Guest Name' => 'RP', 'E-mail Address' => '', 'Attending?' => 'n', 'Entree Choice' => '',
+              'Invited to Rehearsal Dinner?' => 'n', 'Attending Rehearsal Dinner?' => ''
+            },
             { 'RSVP ID' => 'KR123', 'Guest Name' => 'ES', 'E-mail Address' => '', 'Attending?' => '', 'Entree Choice' => '' }
           ])
 
@@ -87,6 +96,14 @@ describe Invitation do
 
           it 'includes the reverse link to the invitation' do
             invitation.guests.collect(&:invitation).should == [invitation] * 3
+          end
+
+          it 'includes the rehearsal dinner invite status' do
+            invitation.guests.collect(&:invited_to_rehearsal_dinner).should == [false, true, false]
+          end
+
+          it 'includes the rehearsal dinner attendance status' do
+            invitation.guests.collect(&:attending_rehearsal_dinner).should == [false, true, nil]
           end
         end
 

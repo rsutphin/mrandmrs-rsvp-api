@@ -76,6 +76,9 @@ describe Guest do
       ])
 
       # base object should be valid
+      unless guest.valid?
+        puts guest.errors.full_messages
+      end
       guest.should be_valid
     end
 
@@ -164,6 +167,67 @@ describe Guest do
           guest.errors[string_attribute].should include(
             "is too long (maximum is 1024 characters)"
           )
+        end
+      end
+    end
+
+    describe 'of #attending_rehearsal_dinner' do
+      describe 'when #invited_to_rehearsal_dinner is true' do
+        before do
+          guest.invited_to_rehearsal_dinner = true
+        end
+
+        [true, false, nil].each do |valid_value|
+          it "is valid when attending_rehearsal_dinner=#{valid_value.inspect}" do
+            guest.attending_rehearsal_dinner = valid_value
+            guest.should be_valid
+          end
+        end
+
+        {
+          :integer => 9,
+          :string => 'foo'
+        }.each do |invalid_type, example_value|
+          it "is invalid with an #{invalid_type}" do
+            guest.attending_rehearsal_dinner = example_value
+            guest.should_not be_valid
+
+            guest.errors[:attending_rehearsal_dinner].should == [
+              "invalid value for attending_rehearsal_dinner"
+            ]
+          end
+        end
+      end
+
+      describe 'when #invited_to_rehearsal_dinner is false' do
+        before do
+          guest.invited_to_rehearsal_dinner = false
+        end
+
+        [false, nil].each do |valid_value|
+          it "is valid when attending_rehearsal_dinner=#{valid_value.inspect}" do
+            guest.attending_rehearsal_dinner = valid_value
+            guest.should be_valid
+          end
+        end
+
+        it "is invalid when attending_rehearsal_dinner=true" do
+          guest.attending_rehearsal_dinner = true
+          guest.should_not be_valid
+        end
+
+        {
+          :integer => 9,
+          :string => 'foo'
+        }.each do |invalid_type, example_value|
+          it "is invalid with an #{invalid_type}" do
+            guest.attending_rehearsal_dinner = example_value
+            guest.should_not be_valid
+
+            guest.errors[:attending_rehearsal_dinner].should == [
+              "invalid value for attending_rehearsal_dinner"
+            ]
+          end
         end
       end
     end
