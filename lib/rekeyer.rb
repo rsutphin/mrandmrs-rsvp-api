@@ -22,6 +22,13 @@ class Rekeyer
     $stderr.puts "Replaced #{new_keys.size} RSVP IDs"
   end
 
+  def generate_key
+    to_chars(
+      prng.rand(CHARS.size ** LENGTH),
+      LENGTH
+    ).upcase
+  end
+
   private
 
   def new_keys
@@ -34,13 +41,6 @@ class Rekeyer
 
   def prng
     @prng ||= Random.new
-  end
-
-  def generate_key
-    to_chars(
-      prng.rand(CHARS.size ** LENGTH),
-      LENGTH
-    ).upcase
   end
 
   def to_chars(i, size)
