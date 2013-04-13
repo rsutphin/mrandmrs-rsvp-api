@@ -31,7 +31,7 @@ Rehearsal Dinner?".
 Corresponding model: `Guest`.
 
 * You must pre-fill "RSVP ID", "Guest Name", and (if applicable) "Invited to
-  Rehearsal Dinner".
+  Rehearsal Dinner?".
 * "RSVP ID" should be be the same for all people who are invited with the same
   mailed invitation.
 * Predicate columns (the ones ending with "?") have three states: "Yes", "No",
@@ -44,7 +44,7 @@ Column headers (case matters): "RSVP ID", "Comments", "Hotel".
 
 Corresponding model: `Invitation` (confusing ... but the app model and the
 external concepts don't quite line up and these sheet names are also part of the
-UI. User needs win.)
+admin UI. User needs win.)
 
 This sheet can be left blank initially. It will be filled in / updated as PUTs
 happen.
@@ -52,8 +52,8 @@ happen.
 ### Other sheets
 
 You can have other sheets in the spreadsheet without affecting the API's
-functioning. In mine, I have a "Stats" sheet which provides dynamically-updating
-counts of RSVPs and food selections.
+functioning. In mine I have a "Stats" sheet which provides dynamically-updating
+counts of yes/no/not responded and food selections.
 
 ## Architecture
 
@@ -87,8 +87,8 @@ features for examples.
 
 Control is limited to the following resources:
 
-GET /invitations/{id}
-PUT /invitations/{id}
+    GET /invitations/{id}
+    PUT /invitations/{id}
 
 Because the IDs will need to be human-readable and typeable (and so short),
 there should be some anti-brute-forcing security for both of these. Design
