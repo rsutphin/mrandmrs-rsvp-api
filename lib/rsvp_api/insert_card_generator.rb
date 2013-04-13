@@ -2,6 +2,12 @@ require 'prawn'
 require 'prawn/measurement_extensions'
 
 module RsvpApi
+  ##
+  # Generates letter-size PDF containing 6 separable insert cards per page.
+  # Each card corresponds to one {Invitation}.
+  #
+  # Expects there to be a directory named `fonts` which includes TTF versions
+  # of several variants of Futura.
   class InsertCardGenerator
     PAGE_SIZE = [8.5.in, 11.in]
     MARGIN = 0.25.in

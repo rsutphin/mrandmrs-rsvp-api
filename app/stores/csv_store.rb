@@ -1,5 +1,7 @@
 require 'csv'
 
+##
+# A store based on a directory full of CSVs.
 class CsvStore
   attr_reader :directory
 

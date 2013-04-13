@@ -1,6 +1,8 @@
 require 'google_drive'
 require 'google_device_oauth'
 
+##
+# A store based on a Google Spreadsheet.
 class GoogleStore
   attr_reader :doc_title
 
