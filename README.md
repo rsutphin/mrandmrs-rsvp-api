@@ -2,7 +2,10 @@
 
 This application provides the back end for the RSVP page for Kelly Borden and
 Rhett Sutphin's wedding. The RSVP system is a JavaScript single page app which
-consumes and stores JSON from/to this API. (The front end is not in this repo.)
+consumes and stores JSON from/to this API.
+
+The HTML/JavaScript front end that consumes this API is part of our wedding's
+[static site](https://github.com/rsutphin/mrandmrs-site).
 
 ## Utilities
 
