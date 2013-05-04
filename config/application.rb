@@ -1,11 +1,8 @@
 require File.expand_path('../boot', __FILE__)
 
 # Pick the frameworks you want:
-# require "active_record/railtie"
 require "action_controller/railtie"
 require "action_mailer/railtie"
-require "active_resource/railtie"
-require "sprockets/railtie"
 require "rails/test_unit/railtie"
 
 if defined?(Bundler)
@@ -69,6 +66,10 @@ module RsvpApi
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
+
+    # Rails 4 requires a secret key even if you don't use any of the features that
+    # would use it.
+    config.secret_key_base = 'thisisnotasecretitisjusttoplacaterails4'
 
     require 'rsvp_api/store_for_request'
 
